@@ -7,13 +7,8 @@ public class ProcessDecisionPunct : IPunct
     public void WriteToList(List<string> processes)
     {
         var path = @$"{Directory.GetCurrentDirectory()}\JobList.txt";
-        using (StreamWriter sWriter = new StreamWriter(path))
-        {
-            foreach (var process in processes)
-            {
-                sWriter.WriteLine(process);
-            }
-        }
+        
+        JobListChanged?.Invoke();
     }
     public void Activate()
     {

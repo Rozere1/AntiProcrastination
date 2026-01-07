@@ -1,4 +1,6 @@
-﻿public class JobModule
+﻿using System.Diagnostics;
+
+public class JobModule
 {
     public List<string> JobProcessesName { get; private set; }
 
@@ -23,7 +25,7 @@
         {
             if (!JobProcessesName.Contains(process.ProcessName))
             {
-                process.Close();
+                
                 process.Kill();
                 Logger.Write(process.ProcessName + " Killed");
             }

@@ -1,5 +1,7 @@
 ﻿
 
+using Anti_Procrastination;
+
 public abstract class Menu
 {
     protected string[] _puncts;
@@ -23,18 +25,19 @@ public abstract class Menu
     protected void GetInput()
     {
 
-        var key = Convert.ToInt32(Console.ReadLine());
+        
 
         try
         {
-            Console.WriteLine(key - 1);
+            var key = Convert.ToInt32(Console.ReadLine());
             _punctsCommand[key - 1].Activate();
 
         }
         catch (Exception e)
         {
             Logger.Write(e.Message);
-            throw;
+            Console.Write($"Произошла ошибка: {e.Message}\n");
+            Program.Exit();
         }
     }
 }

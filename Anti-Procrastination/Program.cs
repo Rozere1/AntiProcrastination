@@ -1,12 +1,21 @@
-﻿namespace Anti_Procrastination
+﻿using System.Diagnostics;
+
+namespace Anti_Procrastination
 {
     public class Program
     {
         private static bool isOpen = true;
         private static void Main()
         {
+            Validate();
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.Start();
+            var dExp = new DirectoryExplorer();
+            while (true)
+            {
+                dExp.ControlCursor();
+            }
+            
             MenuManager menuManager = bootstrap.manager.GetComponent<MenuManager>("MenuManager");
             while (isOpen)
             {
@@ -19,21 +28,34 @@
 
         public static void Exit()
         {
-            Process process = Process.GetCurrentProcess();
-            process.Kill();
+            isOpen = false;
+            Environment.Exit(0);
 
         }
+        private static void Validate()
+        {
+            
+            var listDirPath = @$"{Directory.GetCurrentDirectory()}\Lists";
+            var logsDirPath = @$"{Directory.GetCurrentDirectory()}\Logs";
 
+            if (!Directory.Exists(listDirPath))
+                Directory.CreateDirectory(listDirPath);
+            if(!Directory.Exists(logsDirPath))
+                Directory.CreateDirectory(logsDirPath);
+            Logger.Init();
+        }
 
     }
     public class Bootstrap
     {
-        public ServiceLocator manager;
-
+        public ServiceLocator manager { get; private set; } = new ServiceLocator();
         public void Start()
         {
-            Logger.Init();
-            manager = new ServiceLocator();
+
+            ProgramListManager listManager = new ProgramListManager();
+            manager.AddComponent(listManager);
+            
+            
             var puncts_MainMenu = new string[]
             {
                 "1. Ограничение времени",
@@ -45,7 +67,6 @@
 
             MainMenu mainMenu = new MainMenu(puncts_MainMenu, punctsCommand_MainMenu);
 
-            manager.AddComponent(mainMenu);
             var puncts_TimerMenu = new string[]
             {
                 "1. Звук срабатывания",
@@ -56,7 +77,6 @@
 
             TimerMenu timerMenu = new TimerMenu(puncts_TimerMenu, punctsCommand_TimerMenu);
 
-            manager.AddComponent(timerMenu);
 
             var puncts_TimeBlockerMenu = new string[]
             {
@@ -71,7 +91,6 @@
 
             TimeBlockerMenu timeBlockerMenu = new TimeBlockerMenu(puncts_TimeBlockerMenu, punctsCommand_TimeBlockerMenu);
 
-            manager.AddComponent(timeBlockerMenu);
 
             var puncts_JobMenu = new string[]
             {
@@ -84,12 +103,11 @@
 
 
             JobMenu jobMenu = new JobMenu(puncts_JobMenu, punctsCommand_JobMenu);
-            manager.AddComponent(jobMenu);
 
             MenuManager menuManager = new MenuManager(mainMenu, jobMenu, timeBlockerMenu, timerMenu);
             manager.AddComponent(menuManager);
-            JobModule jobModule = new JobModule(ReadJobProgramList());
-
+            JobModule jobModule = new JobModule(listManager.ReadAList("JobList.txt"));
+            
 
 
             punctsCommand_MainMenu[0] = new GoToNextMenuPunct(manager, MenuVariant.TimeBlockerMenu);
@@ -108,25 +126,6 @@
 
         }
 
-        private List<string> ReadJobProgramList()
-        {
-            var jobList = new List<string>();
-            var path = @$"{Directory.GetCurrentDirectory()}\JobList.txt";
-            var fStream = new FileStream(path, FileMode.OpenOrCreate);
-            using (StreamReader streamReader = new StreamReader(fStream))
-            {
-                string rawJobList = streamReader.ReadToEnd();
-                jobList = rawJobList.Split("\n").ToList();
-                foreach (var job in jobList)
-                {
-                    Logger.Write(job);
-                    Logger.Write(jobList.Count.ToString());
-                    Console.WriteLine(job);
-                }
-            }
-
-            return jobList;
-        }
     }
 
 
