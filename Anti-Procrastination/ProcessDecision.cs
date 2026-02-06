@@ -7,7 +7,7 @@ public class ProcessDecisionPunct : IPunct
     public void WriteToList(List<string> processes)
     {
         var path = @$"{Directory.GetCurrentDirectory()}\JobList.txt";
-        
+
         JobListChanged?.Invoke();
     }
     public void Activate()

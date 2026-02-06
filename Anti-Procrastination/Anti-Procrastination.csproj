@@ -8,4 +8,12 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="DictionaryExplorerTest.cs" />
+    <Compile Remove="DirectoriesDictionary.cs" />
+    <Compile Remove="DirectoryExplorerController.cs" />
+    <Compile Remove="DirectoryExplorerModel.cs" />
+    <Compile Remove="DirectoryExplorerView.cs" />
+  </ItemGroup>
+
 </Project>

@@ -5,14 +5,10 @@ using Anti_Procrastination;
 public abstract class Menu
 {
     protected string[] _puncts;
-    protected Dictionary<int, IPunct> _punctsCommand;
+    protected Dictionary<int, IPunct> _punctsCommand = new Dictionary<int, IPunct>();
 
-    public Menu(string[] puncts, Dictionary<int, IPunct> punctsCommand)
-    {
-        _puncts = puncts;
-        _punctsCommand = punctsCommand;
-    }
-    public void Show()
+
+    public virtual void Show()
     {
         Console.Clear();
         foreach (var punct in _puncts)
@@ -25,7 +21,7 @@ public abstract class Menu
     protected void GetInput()
     {
 
-        
+
 
         try
         {

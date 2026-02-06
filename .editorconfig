@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# CA2011: Избегайте бесконечной рекурсии
+dotnet_diagnostic.CA2011.severity = error

@@ -1,26 +1,44 @@
-﻿namespace Anti_Procrastination;
+﻿using System.Diagnostics;
+
+namespace Anti_Procrastination;
 
 public class ServiceLocator
 {
-    private Dictionary<string, object> components = new Dictionary<string, object>();
+    public static ServiceLocator Instance = new ServiceLocator();
+    private Dictionary<string, object> services = new Dictionary<string, object>();
 
-    public void AddComponent<T>(T component)
+    public void AddComponent<T>(T service)
     {
-        if (components.ContainsValue(component))
-            return;
-        components.Add(component.ToString(), component);
+        string name = typeof(T).Name;
+        if(!services.ContainsKey(name))
+        {
+            services[name] = service;
+        }
+
     }
 
-    public void RemoveComponent<T>(T component)
+    public void RemoveComponent<T>(T service)
     {
-        if (components.ContainsValue(component))
-            components.Remove(component.ToString());
+        string name = typeof(T).Name;
+        if (services.ContainsKey(name))
+        {
+            services.Remove(name);
+        }
+
     }
 
-    public T GetComponent<T>(string component)
+    public T Get<T>()
     {
-        if (components.ContainsKey(component))
-            return (T)components[component];
-        throw new NullReferenceException();
+        string name = typeof(T).Name;
+        if (services.ContainsKey(name))
+        {
+
+            return (T)services[name];
+        }
+        else
+        {
+
+            throw new NullReferenceException();
+        }
     }
 }

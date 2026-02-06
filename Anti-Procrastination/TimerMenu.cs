@@ -2,7 +2,14 @@
 
 public class TimerMenu : Menu
 {
-    public TimerMenu(string[] puncts, Dictionary<int, IPunct> punctsCommand) : base(puncts, punctsCommand)
+    public TimerMenu()
     {
+        _puncts = new string[]
+        {
+                "1. Звук срабатывания",
+                "2. Показывать поверх окон",
+                "3. Назад"
+        };
+        _punctsCommand[2] = new GoBackPunct();
     }
 }
