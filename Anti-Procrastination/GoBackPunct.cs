@@ -2,10 +2,9 @@
 
 public class GoBackPunct : IPunct
 {
-    private MenuManager menuManager;
 
     public void Activate()
     {
-        ServiceLocator.Instance.Get<MenuManager>().GoToBackMenu();
+        ServiceLocator.Instance.Get<MenuManager>().GoToBack();
     }
 }

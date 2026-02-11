@@ -9,10 +9,15 @@ namespace Anti_Procrastination
         {
             var programList = new List<string>();
             var pathToFile = @$"{path}\{file}";
+            if (!File.Exists(pathToFile))
+            {
+                var w = File.Create(pathToFile);
+                w.Dispose();
+            }
             using (StreamReader streamReader = new StreamReader(pathToFile))
             {
 
-                List<string> rawJobList = streamReader.ReadToEnd().Split('\n').ToList();
+                List<string> rawJobList = streamReader.ReadToEnd().Split('\n', StringSplitOptions.TrimEntries).ToList() ;
                 for (int i = 0; i < rawJobList.Count; i++)
                 {
                     {
@@ -20,12 +25,8 @@ namespace Anti_Procrastination
                             rawJobList.Remove(rawJobList[i]);
                     }
                     programList = rawJobList;
-                    Logger.Write($"BlackList Programs Count: {programList.Count}\nPrograms:\n[");
-                    foreach (var program in programList)
-                    {
-                        Logger.Write($"{program}");
-                    }
-                    Logger.Write("]");
+                    Logger.Write($"BlackList Programs Count: {programList.Count}\nPrograms:");
+
                 }
                 return programList;
             }

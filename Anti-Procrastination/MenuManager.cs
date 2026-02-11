@@ -12,17 +12,21 @@ public class MenuManager
         menus.Add(MenuVariant.TimeBlockerMenu, timeBlockerMenu);
         menus.Add(MenuVariant.TimerMenu, timerMenu);
     }
-    public void GoToBackMenu()
+    public void GoToBack()
     {
         currentVar = prevVars.Peek();
         menus[prevVars.Pop()].Show();
 
     }
 
-    public void ShowMenu(MenuVariant menuVar)
+    public void Show(MenuVariant menuVar)
     {
         prevVars.Push(currentVar);
         currentVar = menuVar;
+        menus[currentVar].Show();
+    }
+    public void OpenCurrent()
+    {
         menus[currentVar].Show();
     }
 }

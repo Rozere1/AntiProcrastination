@@ -1,29 +1,15 @@
 ﻿using System.Diagnostics;
 
-namespace Anti_Procrastination;
-
-public class SwitchJobModulePunct : IPunct
+public class SwitchModulePunct : IPunct
 {
-    private JobModule module;
+    private ISwitch _module;
 
-    public SwitchJobModulePunct(JobModule jobModule)
+    public SwitchModulePunct(ISwitch module)
     {
-        module = jobModule;
+        _module = module;
     }
     public void Activate()
     {
-        module.Switch();
-    }
-}
-public class OpenProgramEditPunct : IPunct
-{
-    private string _arguments;
-    public OpenProgramEditPunct(string arguments)
-    {
-        _arguments = arguments;
-    }
-    public void Activate()
-    {
-        Process.Start(new ProcessStartInfo("notepad.exe", _arguments));
+        _module.Switch();
     }
 }

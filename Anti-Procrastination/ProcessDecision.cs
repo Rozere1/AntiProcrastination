@@ -4,14 +4,21 @@ public class ProcessDecisionPunct : IPunct
 {
     public static event Action JobListChanged;
 
-    public void WriteToList(List<string> processes)
+    public void CheckList()
     {
-        var path = @$"{Directory.GetCurrentDirectory()}\JobList.txt";
-
+        
         JobListChanged?.Invoke();
     }
     public void Activate()
     {
-
+        Check();
+    }
+    private async void Check()
+    {
+        while (true)
+        {
+            CheckList();
+            Task.Delay(5000).Wait();
+        }
     }
 }

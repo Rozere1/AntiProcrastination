@@ -37,7 +37,7 @@ public class ServiceLocator
         }
         else
         {
-
+            Logger.Write("None Service to return");
             throw new NullReferenceException();
         }
     }

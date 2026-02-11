@@ -1,49 +1,64 @@
-﻿using System.Diagnostics;
+﻿using Anti_Procrastination;
+using System;
+using System.Diagnostics;
 
-public class JobModule
+public class JobModule : Module, ISwitch
 {
-    public List<string> JobProcessesName { get; private set; }
-
-    public ReactiveProperty<bool> IsRun { get; private set; }
-    
-    public JobModule(List<string> jobProcessesName)
-    {
-
-        IsRun = new ReactiveProperty<bool>();
-        JobProcessesName = jobProcessesName;
-
-    }
-
-    public void Switch()
+    public ReactiveProperty<bool> IsRun { get; protected set; }
+    public async void Switch()
     {
         IsRun.Value = !IsRun.Value;
         if (IsRun.Value)
         {
-            HookProcesses();
+            
+            Activate();
         }
     }
-    private void ScanForProcesses()
+
+    public JobModule() : base()
     {
-        var processes = Process.GetProcesses();
-        foreach (var process in processes)
-        {
-            if (JobProcessesName.Contains(process.ProcessName))
-            {
+        IsRun = new ReactiveProperty<bool>();
+    }
 
+    
+    protected async void KillBlackListProcesess()
+    {
+        if (_bannedProcesses.Count == 0)
+            return;
+        for (int i = 0; i < _bannedProcesses.Count; i++)
+        {
+            var process = _bannedProcesses[i];
+            _bannedProcesses.Remove(process);
+            process.CloseMainWindow();
+            process.WaitForExit(5000);
+            
+            if (!process.HasExited)
+            {
                 process.Kill();
-                Logger.Write(process.ProcessName + " Killed");
+                process.WaitForExit();
             }
+
+            Logger.Write(process.ProcessName + " Killed");
+            
         }
 
     }
 
-    private async void HookProcesses()
+
+    protected async override void Activate()
     {
         while (IsRun.Value)
         {
-            ScanForProcesses();
-            await Task.Delay(5000);
+            HookProcesses();
+            await Task.Run(KillBlackListProcesess);
+            
+            await Task.Delay(1000);
         }
     }
+    public void Act()
+    {
+        Activate();
+    }
+   
 
 }

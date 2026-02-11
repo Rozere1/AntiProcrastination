@@ -21,8 +21,6 @@ public abstract class Menu
     protected void GetInput()
     {
 
-
-
         try
         {
             var key = Convert.ToInt32(Console.ReadLine());
@@ -32,8 +30,8 @@ public abstract class Menu
         catch (Exception e)
         {
             Logger.Write(e.Message);
-            Console.Write($"Произошла ошибка: {e.Message}\n");
-            Program.Exit();
+            Console.Write($"Произошла ошибка: {e.Message}\n{e.StackTrace}");
+            Console.ReadKey();
         }
     }
 }

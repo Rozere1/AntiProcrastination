@@ -2,7 +2,6 @@
 
 public class GoToNextMenuPunct : IPunct
 {
-    private MenuManager _menuManager;
     private MenuVariant _menuVar;
     public GoToNextMenuPunct(MenuVariant menuVar)
     {
@@ -10,6 +9,6 @@ public class GoToNextMenuPunct : IPunct
     }
     public void Activate()
     {
-        ServiceLocator.Instance.Get<MenuManager>().ShowMenu(_menuVar);
+        ServiceLocator.Instance.Get<MenuManager>().Show(_menuVar);
     }
 }
