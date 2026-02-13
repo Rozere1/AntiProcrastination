@@ -2,9 +2,9 @@
 
 namespace Anti_Procrastination
 {
-    public class ProgramListManager
+    public class ProgramListManager : IService
     {
-        private string path = @$"{Directory.GetCurrentDirectory()}\Lists";
+        private readonly string  path = @$"{Directory.GetCurrentDirectory()}\Lists";
         public List<string> ReadAList(string file)
         {
             var programList = new List<string>();
@@ -14,22 +14,17 @@ namespace Anti_Procrastination
                 var w = File.Create(pathToFile);
                 w.Dispose();
             }
-            using (StreamReader streamReader = new StreamReader(pathToFile))
+            using var streamReader = new StreamReader(pathToFile);
+
+            try
             {
-
-                List<string> rawJobList = streamReader.ReadToEnd().Split('\n', StringSplitOptions.TrimEntries).ToList() ;
-                for (int i = 0; i < rawJobList.Count; i++)
-                {
-                    {
-                        if (rawJobList[i].StartsWith('#'))
-                            rawJobList.Remove(rawJobList[i]);
-                    }
-                    programList = rawJobList;
-                    Logger.Write($"BlackList Programs Count: {programList.Count}\nPrograms:");
-
-                }
-                return programList;
+                programList = streamReader.ReadToEnd().Split('\n', StringSplitOptions.TrimEntries).ToList();
             }
+            catch
+            {
+                Console.WriteLine("Ошибка при чтении");
+            }
+            return programList;
 
 
         }

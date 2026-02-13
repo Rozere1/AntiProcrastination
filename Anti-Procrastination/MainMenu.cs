@@ -9,12 +9,13 @@ public class MainMenu : Menu
     public MainMenu()
     {
         var jobModule = ServiceLocator.Instance.Get<JobModule>();
+        isJobModuleActivated = jobModule.IsRun.Value;
         jobModule.IsRun.OnChanged += OnJobModuleChanged;
         
         _puncts = new string[]
         {
             $"1. Ограничение времени",
-            $"[ ]2. Режим работы",
+            $"[]2. Режим работы",
             "3. Выйти"
         };
         
@@ -31,7 +32,7 @@ public class MainMenu : Menu
 
     public override void Show()
     {
-        string jActivated = isJobModuleActivated ? "X" : " ";
+        string jActivated = isJobModuleActivated ? "X" : "";
         _puncts[1] = $"[{jActivated}]2. Режим работы";
         base.Show();
 

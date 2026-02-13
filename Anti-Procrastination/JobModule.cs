@@ -1,16 +1,16 @@
-﻿using Anti_Procrastination;
-using System;
-using System.Diagnostics;
+﻿
 
-public class JobModule : Module, ISwitch
+public class JobModule : Module, ISwitch, IService
 {
     public ReactiveProperty<bool> IsRun { get; protected set; }
+    private bool safeEnable;
     public async void Switch()
     {
+        if (safeEnable)
+            return;
         IsRun.Value = !IsRun.Value;
         if (IsRun.Value)
         {
-            
             Activate();
         }
     }
@@ -18,8 +18,14 @@ public class JobModule : Module, ISwitch
     public JobModule() : base()
     {
         IsRun = new ReactiveProperty<bool>();
+        
     }
-
+    public void SafeEnable()
+    {
+        safeEnable = true;
+        IsRun.Value = true;
+        
+    }
     
     protected async void KillBlackListProcesess()
     {
@@ -45,7 +51,7 @@ public class JobModule : Module, ISwitch
     }
 
 
-    protected async override void Activate()
+    public async override void Activate()
     {
         while (IsRun.Value)
         {
@@ -55,10 +61,6 @@ public class JobModule : Module, ISwitch
             await Task.Delay(1000);
         }
     }
-    public void Act()
-    {
-        Activate();
-    }
-   
+
 
 }

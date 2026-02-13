@@ -4,14 +4,16 @@ public class TimeBlockerMenu : Menu
 {
     private TimeBlockerModule _module;
     private int _useTime;
+    
     public TimeBlockerMenu(TimeBlockerModule module, string path)
     {
         _module = module;
         _useTime = _module.UseTime.Value;
         _module.UseTime.OnChanged += UseTimeChanged;
+        
         _puncts = new string[]
         {
-                $"1. Время пользования: {_useTime} минут",
+                $"1. Время пользования: {TimeFormatter.Format(_useTime)}",
                 "2. Редактировать чёрный список",
                 "3. Кастомизация таймера",
                 "4. Назад"
@@ -29,7 +31,7 @@ public class TimeBlockerMenu : Menu
     }
     public override void Show()
     {
-        _puncts[1] = $"2. Время пользования: {_useTime} минут";
+        _puncts[0] = $"1. Время пользования: {TimeFormatter.Format(_useTime)}";
         base.Show();
     }
 }
