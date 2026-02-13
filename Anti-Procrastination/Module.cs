@@ -13,8 +13,8 @@ public abstract class Module
         programListManager = ServiceLocator.Instance.Get<ProgramListManager>();
         _blackList = programListManager.ReadAList("BlackList.txt");
         Program.BlackListChanged += OnBlackListChanged;
+        Logger.Write($"{GetType().Name} Inited");
 
-        
     }
 
     private void OnBlackListChanged()
@@ -25,7 +25,7 @@ public abstract class Module
     
 
 
-    protected abstract void Activate();
+    public abstract void Activate();
     protected async void HookProcesses()
     {
 

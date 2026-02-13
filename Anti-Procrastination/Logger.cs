@@ -16,7 +16,7 @@ public static class Logger
     {
         using (StreamWriter sWriter = new StreamWriter(_path, true))
         {
-            sWriter.Write($"\n{log}");
+            sWriter.WriteLine($"{log}");
         }
     }
 }

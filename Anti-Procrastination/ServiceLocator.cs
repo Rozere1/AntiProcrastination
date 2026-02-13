@@ -4,10 +4,10 @@ namespace Anti_Procrastination;
 
 public class ServiceLocator
 {
-    public static ServiceLocator Instance = new ServiceLocator();
-    private Dictionary<string, object> services = new Dictionary<string, object>();
+    public static readonly ServiceLocator Instance = new ServiceLocator();
+    private Dictionary<string, IService> services = new Dictionary<string, IService>();
 
-    public void AddComponent<T>(T service)
+    public void AddComponent<T>(T service) where T : IService
     {
         string name = typeof(T).Name;
         if(!services.ContainsKey(name))
@@ -17,7 +17,7 @@ public class ServiceLocator
 
     }
 
-    public void RemoveComponent<T>(T service)
+    public void RemoveComponent<T>(T service) where T : IService
     {
         string name = typeof(T).Name;
         if (services.ContainsKey(name))
@@ -27,13 +27,13 @@ public class ServiceLocator
 
     }
 
-    public T Get<T>()
+    public T Get<T>() where T : IService
     {
         string name = typeof(T).Name;
-        if (services.ContainsKey(name))
+        if (services.TryGetValue(name, out IService? value))
         {
 
-            return (T)services[name];
+            return (T)value;
         }
         else
         {

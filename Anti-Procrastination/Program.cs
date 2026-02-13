@@ -1,34 +1,33 @@
 ﻿
+
 namespace Anti_Procrastination
 {
     public class Program
     {
+        public static readonly string BlackList = @$"{Directory.GetCurrentDirectory()}\Lists\BlackList.txt";
         public static event Action BlackListChanged;
-        public static bool isOpen { get; private set; }
+
+        public static bool IsOpen { get; private set; }
         private static void Main()
         {
             Validate();
             Logger.Init();
-            Bootstrap bootstrap = new Bootstrap();
+            var bootstrap = new Bootstrap();
             bootstrap.Start();
-            isOpen = true;
+
+            IsOpen = true;
             using var fileWatcher = new FileSystemWatcher(@$"{Directory.GetCurrentDirectory()}\Lists");
             fileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.LastAccess;
             fileWatcher.Changed += OnChanged;
             fileWatcher.EnableRaisingEvents = true;
-
             MenuManager menuManager = ServiceLocator.Instance.Get<MenuManager>();
             menuManager.Show(MenuVariant.MainMenu);
-            
-            while (isOpen)
+
+            while (IsOpen)
             {
                 menuManager.OpenCurrent();
                 
             }
-            
-            
-
-
         }
 
         private static void OnChanged(object sender, FileSystemEventArgs e)
@@ -38,7 +37,7 @@ namespace Anti_Procrastination
 
         public static void Exit()
         {
-            isOpen = false;
+            IsOpen = false;
             Environment.Exit(0);
 
         }
@@ -63,27 +62,32 @@ namespace Anti_Procrastination
     }
     public class Bootstrap
     {
-        private string BlackList = @$"{Directory.GetCurrentDirectory()}\Lists\BlackList.txt";
+        
+        
         public void Start()
         {
-            
+
+
             ProgramListManager listManager = new ProgramListManager();
+
             ServiceLocator.Instance.AddComponent(listManager);
+
             var jobModule = new JobModule();
-            
             ServiceLocator.Instance.AddComponent(jobModule);
 
-            var blockerModule = new TimeBlockerModule();
+            var blockerModule = Loader.Load<TimeBlockerModule>();
+            blockerModule.Activate();
+
             ServiceLocator.Instance.AddComponent(blockerModule);
-            TimerMenu timerMenu = new TimerMenu();
+            var timerMenu = new TimerMenu();
 
-            TimeBlockerMenu timeBlockerMenu = new TimeBlockerMenu(blockerModule ,BlackList);
+            var timeBlockerMenu = new TimeBlockerMenu(blockerModule , Program.BlackList);
 
-            JobMenu jobMenu = new JobMenu(jobModule, BlackList);
+            var jobMenu = new JobMenu(jobModule, Program.BlackList);
 
-            MainMenu mainMenu = new MainMenu();
+            var mainMenu = new MainMenu();
 
-            MenuManager menuManager = new MenuManager(mainMenu, jobMenu, timeBlockerMenu, timerMenu);
+            var menuManager = new MenuManager(mainMenu, jobMenu, timeBlockerMenu, timerMenu);
             ServiceLocator.Instance.AddComponent(menuManager);
         }
 
@@ -91,5 +95,3 @@ namespace Anti_Procrastination
 
 
 }
-
-

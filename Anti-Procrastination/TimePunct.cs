@@ -3,14 +3,14 @@
     private TimeBlockerModule _module;
     public TimePunct(TimeBlockerModule module)
     { 
-        _module = module; 
+        _module = module;
     }
     public void Activate()
     {
-         Console.Clear();
-        Console.Write("Введите время использования в минутах: ");
+        Console.Clear();
+        Console.Write("Введите время использования в секундах: ");
         int value = Convert.ToInt32(Console.ReadLine());
         _module.UseTime.Value = value;
-        Saver.Save(_module.UseTime);
+        Saver.Save(_module);
     }
 }

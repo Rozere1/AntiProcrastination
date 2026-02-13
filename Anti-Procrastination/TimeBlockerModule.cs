@@ -2,30 +2,35 @@
 using Anti_Procrastination;
 using Newtonsoft.Json;
 
-public class TimeBlockerModule : Module
+public class TimeBlockerModule : Module, IService
 {
     
     public ReactiveProperty<int> UseTime { get; set;  }
     private JobModule jobModule;
     private int _currentTime;
-
+    [JsonProperty("IsOvered")]
+    public bool IsOvered { get; private set; }
     public TimeBlockerModule() : base()
     {
+       
+        UseTime = new ReactiveProperty<int>();
+        UseTime.Value = 10800;
+
         
-        UseTime = SaveLoader.Load<ReactiveProperty<int>>();
-        if(UseTime == null)
-        {
-            UseTime = new ReactiveProperty<int>();
-            UseTime.Value = 240;
-        }
-        jobModule = ServiceLocator.Instance.Get<JobModule>();
     }
 
-    protected async override void Activate()
+    public async override void Activate()
     {
-        _currentTime = UseTime.Value * 60;
+        jobModule = ServiceLocator.Instance.Get<JobModule>();
+        _currentTime = UseTime.Value;
+        if (IsOvered)
+        {
+            KillAllProcesses();
+            return;
+        }
+        await Task.Run(HookProcesses);
         await Task.Run(StartTimer);
-        ServiceLocator.Instance.Get<MenuManager>().OpenCurrent();
+       
     }
     private async void StartTimer()
     {
@@ -37,23 +42,23 @@ public class TimeBlockerModule : Module
                 await Task.Delay(1000);
                 _currentTime -= 1;
             }
-            if (_currentTime < 0)
+            if (_currentTime <= 0)
             {
                 await Task.Run(KillAllProcesses);
+                IsOvered = true;
+                Saver.Save(this);
                 break;
             }
         }
+
     }
     private void KillAllProcesses()
     {
         jobModule.IsRun.Value = true;
-        jobModule.IsRun.OnChanged += OnTimeOver;
-        
-        jobModule.Act();
+        jobModule.SafeEnable();
+        jobModule.Activate();
     }
 
-    private void OnTimeOver(bool obj)
-    {
-        jobModule.IsRun.Value = true;
-    }
+
+
 }
