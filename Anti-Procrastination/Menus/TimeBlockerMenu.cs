@@ -1,16 +1,18 @@
-﻿namespace Anti_Procrastination;
+﻿using Anti_Procrastination.Puncts;
+using Anti_Procrastination.Services;
+
+namespace Anti_Procrastination.Menus;
 
 public class TimeBlockerMenu : Menu
 {
-    private TimeBlockerModule _module;
     private int _useTime;
-    
-    public TimeBlockerMenu(TimeBlockerModule module, string path)
+
+    public TimeBlockerMenu(string path)
     {
-        _module = module;
-        _useTime = _module.UseTime.Value;
-        _module.UseTime.OnChanged += UseTimeChanged;
-        
+        var module = ServiceLocator.Instance.Get<TimeBlockerModule>();
+        _useTime = module.UseTime.Value;
+        module.UseTime.OnChanged += UseTimeChanged;
+
         _puncts = new string[]
         {
                 $"1. Время пользования: {TimeFormatter.Format(_useTime)}",
@@ -18,12 +20,11 @@ public class TimeBlockerMenu : Menu
                 "3. Кастомизация таймера",
                 "4. Назад"
         };
-        _punctsCommand[0] = new TimePunct(_module);
+
+        _punctsCommand[0] = new TimePunct(module);
         _punctsCommand[1] = new OpenProgramEditPunct(path);
-        
         _punctsCommand[2] = new GoToNextMenuPunct(MenuVariant.TimerMenu);
         _punctsCommand[3] = new GoBackPunct();
-
     }
     private void UseTimeChanged(int time)
     {

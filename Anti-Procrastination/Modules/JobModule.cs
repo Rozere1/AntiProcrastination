@@ -18,15 +18,15 @@ public class JobModule : Module, ISwitch, IService
     public JobModule() : base()
     {
         IsRun = new ReactiveProperty<bool>();
-        
+
     }
     public void SafeEnable()
     {
         safeEnable = true;
         IsRun.Value = true;
-        
+
     }
-    
+
     protected async void KillBlackListProcesess()
     {
         if (_bannedProcesses.Count == 0)
@@ -37,15 +37,15 @@ public class JobModule : Module, ISwitch, IService
             _bannedProcesses.Remove(process);
             process.CloseMainWindow();
             process.WaitForExit(5000);
-            
+
             if (!process.HasExited)
             {
                 process.Kill();
                 process.WaitForExit();
             }
 
-            Logger.Write(process.ProcessName + " Killed");
-            
+            Logger.Debug(process.ProcessName + " Killed");
+
         }
 
     }
@@ -57,7 +57,7 @@ public class JobModule : Module, ISwitch, IService
         {
             HookProcesses();
             await Task.Run(KillBlackListProcesess);
-            
+
             await Task.Delay(1000);
         }
     }

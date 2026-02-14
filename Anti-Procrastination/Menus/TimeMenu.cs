@@ -1,6 +1,6 @@
 ﻿public class TimeMenu : Menu
 {
-    public TimeMenu() 
+    public TimeMenu()
     {
 
     }

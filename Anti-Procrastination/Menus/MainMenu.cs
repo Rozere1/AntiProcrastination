@@ -1,6 +1,7 @@
-﻿
+﻿using Anti_Procrastination.Puncts;
+using Anti_Procrastination.Services;
 
-namespace Anti_Procrastination;
+namespace Anti_Procrastination.Menus;
 
 public class MainMenu : Menu
 {
@@ -11,15 +12,15 @@ public class MainMenu : Menu
         var jobModule = ServiceLocator.Instance.Get<JobModule>();
         isJobModuleActivated = jobModule.IsRun.Value;
         jobModule.IsRun.OnChanged += OnJobModuleChanged;
-        
+
         _puncts = new string[]
         {
             $"1. Ограничение времени",
             $"[]2. Режим работы",
             "3. Выйти"
         };
-        
-        _punctsCommand[0] = new GoToNextMenuPunct( MenuVariant.TimeBlockerMenu);
+
+        _punctsCommand[0] = new GoToNextMenuPunct(MenuVariant.TimeBlockerMenu);
         _punctsCommand[1] = new GoToNextMenuPunct(MenuVariant.JobMenu);
         _punctsCommand[2] = new ExitPunct();
 

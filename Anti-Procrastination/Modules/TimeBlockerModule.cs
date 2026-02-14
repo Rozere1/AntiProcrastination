@@ -1,28 +1,27 @@
-﻿
-using Anti_Procrastination;
+﻿using Anti_Procrastination.Services;
 using Newtonsoft.Json;
 
 public class TimeBlockerModule : Module, IService
 {
-    
-    public ReactiveProperty<int> UseTime { get; set;  }
+
+    public ReactiveProperty<int> UseTime { get; set; }
     private JobModule jobModule;
-    private int _currentTime;
+    public int CurrentTime { get; private set; }
     [JsonProperty("IsOvered")]
     public bool IsOvered { get; private set; }
     public TimeBlockerModule() : base()
     {
-       
+
         UseTime = new ReactiveProperty<int>();
         UseTime.Value = 10800;
 
-        
+
     }
 
     public async override void Activate()
     {
         jobModule = ServiceLocator.Instance.Get<JobModule>();
-        _currentTime = UseTime.Value;
+        CurrentTime = UseTime.Value;
         if (IsOvered)
         {
             KillAllProcesses();
@@ -30,35 +29,54 @@ public class TimeBlockerModule : Module, IService
         }
         await Task.Run(HookProcesses);
         await Task.Run(StartTimer);
-       
+
     }
     private async void StartTimer()
     {
-        
-        while(true)
+
+        while (true)
         {
             if (_isBlackList)
             {
                 await Task.Delay(1000);
-                _currentTime -= 1;
+                CurrentTime -= 1;
+                if (CurrentTime <= 0)
+                {
+                    await Task.Run(KillAllProcesses);
+                    IsOvered = true;
+                    Saver.Save(this);
+                    break;
+                }
             }
-            if (_currentTime <= 0)
+            else
             {
-                await Task.Run(KillAllProcesses);
-                IsOvered = true;
-                Saver.Save(this);
-                break;
+                await Task.Delay(1000);
             }
+
         }
 
     }
     private void KillAllProcesses()
     {
-        jobModule.IsRun.Value = true;
         jobModule.SafeEnable();
         jobModule.Activate();
     }
 
 
 
+}
+public class TimerModule
+{
+    private TimeBlockerModule _module;
+   
+    public TimerModule(TimeBlockerModule module)
+    {
+        _module = module;
+    }
+    public void Display()
+    {
+        Console.Clear();
+        Console.WriteLine(TimeFormatter.Format(_module.CurrentTime));
+    }
+    
 }

@@ -2,7 +2,7 @@
 {
     private TimeBlockerModule _module;
     public TimePunct(TimeBlockerModule module)
-    { 
+    {
         _module = module;
     }
     public void Activate()

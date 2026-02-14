@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace Anti_Procrastination;
+﻿namespace Anti_Procrastination.Services;
 
 public class ServiceLocator
 {
@@ -10,7 +8,7 @@ public class ServiceLocator
     public void AddComponent<T>(T service) where T : IService
     {
         string name = typeof(T).Name;
-        if(!services.ContainsKey(name))
+        if (!services.ContainsKey(name))
         {
             services[name] = service;
         }
@@ -37,7 +35,7 @@ public class ServiceLocator
         }
         else
         {
-            Logger.Write("None Service to return");
+            Logger.Debug("None Service to return");
             throw new NullReferenceException();
         }
     }

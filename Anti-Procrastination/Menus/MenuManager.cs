@@ -1,6 +1,6 @@
-﻿using Anti_Procrastination;
+﻿using Anti_Procrastination.Menus;
 
-public class MenuManager : IService 
+public class MenuManager : IService
 {
     private Dictionary<MenuVariant, Menu> menus = new Dictionary<MenuVariant, Menu>();
     private MenuVariant currentVar;

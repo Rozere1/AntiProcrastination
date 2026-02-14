@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net8</TargetFramework>
     <RootNamespace>Anti_Procrastination</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -12,13 +12,6 @@
 	<PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="DictionaryExplorerTest.cs" />
-    <Compile Remove="DirectoriesDictionary.cs" />
-    <Compile Remove="DirectoryExplorerController.cs" />
-    <Compile Remove="DirectoryExplorerModel.cs" />
-    <Compile Remove="DirectoryExplorerView.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />

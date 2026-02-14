@@ -1,10 +1,8 @@
-﻿
-
-namespace Anti_Procrastination
+﻿namespace Anti_Procrastination.Services
 {
     public class ProgramListManager : IService
     {
-        private readonly string  path = @$"{Directory.GetCurrentDirectory()}\Lists";
+        private readonly string path = @$"{Directory.GetCurrentDirectory()}\Lists";
         public List<string> ReadAList(string file)
         {
             var programList = new List<string>();

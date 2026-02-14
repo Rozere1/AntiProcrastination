@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-public class SwitchModulePunct : IPunct
+﻿public class SwitchModulePunct : IPunct
 {
     private ISwitch _module;
 

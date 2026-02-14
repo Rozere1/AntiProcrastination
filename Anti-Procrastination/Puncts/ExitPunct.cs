@@ -1,4 +1,4 @@
-﻿namespace Anti_Procrastination;
+﻿namespace Anti_Procrastination.Puncts;
 
 public class ExitPunct : IPunct
 {

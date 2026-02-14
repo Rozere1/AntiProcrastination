@@ -1,8 +1,4 @@
-﻿
-
-using Anti_Procrastination;
-
-public abstract class Menu
+﻿public abstract class Menu
 {
     protected string[] _puncts;
     protected Dictionary<int, IPunct> _punctsCommand = new Dictionary<int, IPunct>();
@@ -29,7 +25,7 @@ public abstract class Menu
         }
         catch (Exception e)
         {
-            Logger.Write(e.Message);
+            Logger.Debug(e.Message);
             Console.Write($"Произошла ошибка: {e.Message}\n{e.StackTrace}");
             Console.ReadKey();
         }

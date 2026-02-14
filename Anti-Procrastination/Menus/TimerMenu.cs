@@ -1,4 +1,6 @@
-﻿namespace Anti_Procrastination;
+﻿using Anti_Procrastination.Puncts;
+
+namespace Anti_Procrastination.Menus;
 
 public class TimerMenu : Menu
 {
@@ -10,6 +12,8 @@ public class TimerMenu : Menu
                 "2. Показывать поверх окон",
                 "3. Назад"
         };
+        _punctsCommand[0] = new SoundSetPunct();
+        _punctsCommand[1] = new SoundSetPunct();
         _punctsCommand[2] = new GoBackPunct();
     }
 }

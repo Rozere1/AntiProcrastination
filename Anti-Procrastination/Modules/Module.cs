@@ -1,4 +1,5 @@
 ﻿using Anti_Procrastination;
+using Anti_Procrastination.Services;
 using System.Diagnostics;
 
 public abstract class Module
@@ -13,37 +14,37 @@ public abstract class Module
         programListManager = ServiceLocator.Instance.Get<ProgramListManager>();
         _blackList = programListManager.ReadAList("BlackList.txt");
         Program.BlackListChanged += OnBlackListChanged;
-        Logger.Write($"{GetType().Name} Inited");
+        Logger.Debug($"{GetType().Name} Inited");
 
     }
 
     private void OnBlackListChanged()
     {
         _blackList = programListManager.ReadAList("BlackList.txt");
-        
+
     }
-    
+
 
 
     public abstract void Activate();
     protected async void HookProcesses()
     {
 
-            _currentProcesses = Process.GetProcesses();
-            for (int i = 0; i < _currentProcesses.Length; i++)
+        _currentProcesses = Process.GetProcesses();
+        for (int i = 0; i < _currentProcesses.Length; i++)
+        {
+            if (_blackList.Contains(_currentProcesses[i].ProcessName))
             {
-                if (_blackList.Contains(_currentProcesses[i].ProcessName))
-                {
-                    _bannedProcesses.Add(_currentProcesses[i]);
-                    _isBlackList = true;
-                    
-                }
-                
+                _bannedProcesses.Add(_currentProcesses[i]);
+                _isBlackList = true;
+
             }
-            if(_bannedProcesses.Count == 0)
-            {
-                _isBlackList = false;
-            }
-            
+
+        }
+        if (_bannedProcesses.Count == 0)
+        {
+            _isBlackList = false;
+        }
+
     }
 }
