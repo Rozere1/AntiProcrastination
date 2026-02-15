@@ -12,8 +12,8 @@ public class TimerMenu : Menu
                 "2. Показывать поверх окон",
                 "3. Назад"
         };
-        _punctsCommand[0] = new SoundSetPunct();
-        _punctsCommand[1] = new SoundSetPunct();
+        _punctsCommand[0] = new NotDevelopedPunct();
+        _punctsCommand[1] = new NotDevelopedPunct();
         _punctsCommand[2] = new GoBackPunct();
     }
 }

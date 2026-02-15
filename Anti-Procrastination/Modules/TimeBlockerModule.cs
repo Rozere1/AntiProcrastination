@@ -1,4 +1,5 @@
-﻿using Anti_Procrastination.Services;
+﻿using Anti_Procrastination;
+using Anti_Procrastination.Services;
 using Newtonsoft.Json;
 
 public class TimeBlockerModule : Module, IService
@@ -7,21 +8,32 @@ public class TimeBlockerModule : Module, IService
     public ReactiveProperty<int> UseTime { get; set; }
     private JobModule jobModule;
     public int CurrentTime { get; private set; }
-    [JsonProperty("IsOvered")]
     public bool IsOvered { get; private set; }
     public TimeBlockerModule() : base()
     {
 
         UseTime = new ReactiveProperty<int>();
         UseTime.Value = 10800;
+        UseTime.OnChanged += OnUseTimeChanged;
+        
+        AppDomain.CurrentDomain.ProcessExit += OnQuit;
+    }
 
+    private void OnUseTimeChanged(int obj)
+    {
+        CurrentTime = obj;
+    }
 
+    private void OnQuit(object? sender, EventArgs e)
+    {
+        Saver.Save(this);
     }
 
     public async override void Activate()
     {
         jobModule = ServiceLocator.Instance.Get<JobModule>();
-        CurrentTime = UseTime.Value;
+        
+        
         if (IsOvered)
         {
             KillAllProcesses();
@@ -44,7 +56,6 @@ public class TimeBlockerModule : Module, IService
                 {
                     await Task.Run(KillAllProcesses);
                     IsOvered = true;
-                    Saver.Save(this);
                     break;
                 }
             }
@@ -61,9 +72,7 @@ public class TimeBlockerModule : Module, IService
         jobModule.SafeEnable();
         jobModule.Activate();
     }
-
-
-
+    
 }
 public class TimerModule
 {

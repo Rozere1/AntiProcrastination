@@ -1,5 +1,8 @@
 ﻿using Anti_Procrastination.Menus;
 using Anti_Procrastination.Services;
+using System;
+using System.Diagnostics;
+using System.Net;
 
 namespace Anti_Procrastination
 {
@@ -21,6 +24,7 @@ namespace Anti_Procrastination
             fileWatcher.EnableRaisingEvents = true;
             MenuManager menuManager = ServiceLocator.Instance.Get<MenuManager>();
             menuManager.Show(MenuVariant.MainMenu);
+
             while (IsOpen)
             {
                 menuManager.OpenCurrent();
