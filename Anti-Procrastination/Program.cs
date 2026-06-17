@@ -1,39 +1,58 @@
 ﻿using Anti_Procrastination.Menus;
 using Anti_Procrastination.Services;
-using System;
-using System.Diagnostics;
-using System.Net;
-
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 namespace Anti_Procrastination
 {
     public class Program
     {
         public static readonly string BlackList = @$"{Directory.GetCurrentDirectory()}\Lists\BlackList.txt";
-        public static event Action BlackListChanged;
+        public static event Action<object> FileChanged;
+        public const string Settings = "settings.json";
         public static bool IsOpen { get; private set; }
-        private static void Main()
+        public static bool IsSetting { get; private set; }
+        private static void Main(params string[] args)
         {
             Validate();
-            Logger.Init();
             var bootstrap = new Bootstrap();
-            bootstrap.Start();
-            IsOpen = true;
-            using var fileWatcher = new FileSystemWatcher(@$"{Directory.GetCurrentDirectory()}\Lists");
-            fileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.LastAccess;
-            fileWatcher.Changed += OnChanged;
-            fileWatcher.EnableRaisingEvents = true;
-            MenuManager menuManager = ServiceLocator.Instance.Get<MenuManager>();
-            menuManager.Show(MenuVariant.MainMenu);
 
-            while (IsOpen)
+            using var settingWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory(), Settings);
+            settingWatcher.NotifyFilter = NotifyFilters.LastWrite;
+            settingWatcher.Changed += OnFileChanged;
+            settingWatcher.EnableRaisingEvents = true;
+            if (args.Length == 0)
             {
-                menuManager.OpenCurrent();
+                IsOpen = true;
+                IsSetting = true;
+                bootstrap.StartMenu();
+                MenuManager menuManager = ServiceLocator.Instance.Get<MenuManager>();
+                menuManager.Show<MainMenu>();
+
+                while (IsOpen)
+                {
+                    menuManager.OpenCurrent();
+                }
             }
+            else if (args[0] == "/start")
+            {
+                using var fileWatcher = new FileSystemWatcher(@$"{Directory.GetCurrentDirectory()}\Lists");
+
+                fileWatcher.NotifyFilter = NotifyFilters.LastWrite;
+                fileWatcher.Changed += OnFileChanged;
+                fileWatcher.EnableRaisingEvents = true;
+
+                bootstrap.StartService();
+
+            }
+
         }
-        private static void OnChanged(object sender, FileSystemEventArgs e)
+
+
+        private static void OnFileChanged(object sender, FileSystemEventArgs e)
         {
-            BlackListChanged.Invoke();
+            FileChanged?.Invoke(sender);
         }
+
         public static void Exit()
         {
             IsOpen = false;
@@ -41,8 +60,10 @@ namespace Anti_Procrastination
         }
         public static void Validate()
         {
+            
             var listDirPath = @$"{Directory.GetCurrentDirectory()}\Lists";
             var logsDirPath = @$"{Directory.GetCurrentDirectory()}\Logs";
+            var dataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Anti-Procrastination");
             if (!Directory.Exists(logsDirPath))
             {
                 Directory.CreateDirectory(logsDirPath);
@@ -51,25 +72,73 @@ namespace Anti_Procrastination
             {
                 Directory.CreateDirectory(listDirPath);
             }
+            if (!Directory.Exists(dataPath))
+            {        
+                Directory.CreateDirectory(dataPath);
+            }
+                
+            if (!File.Exists(SaveManager.Instance.path))
+            {
+                var file = File.Create(SaveManager.Instance.path);
+                file.Close();
+            }
         }
     }
+
     public class Bootstrap
     {
-        public void Start()
+        private AntiProcrastinationService GetService(IServiceProvider provider)
         {
-            ProgramListManager listManager = new ProgramListManager();
-            ServiceLocator.Instance.AddComponent(listManager);
+            var service = new AntiProcrastinationService();
+
             var jobModule = new JobModule();
+            service.AddModule(jobModule);
             ServiceLocator.Instance.AddComponent(jobModule);
-            var blockerModule = Loader.Load<TimeBlockerModule>();
-            blockerModule.Activate();
-            ServiceLocator.Instance.AddComponent(blockerModule);
+
+            var timeMod = new TimeBlockerModule();
+            service.AddModule(timeMod);
+
+            var sleepMod = new SleepModule();
+            service.AddModule(sleepMod);
+            ServiceLocator.Instance.AddComponent(sleepMod);
+
+            var taskMod = new TaskModule();
+            service.AddModule(taskMod);
+            
+            return service;
+        }
+        public void StartService()
+        {
+
+            HostApplicationBuilder builder = Host.CreateApplicationBuilder();
+            builder.Services.AddWindowsService(options =>
+            {
+                options.ServiceName = "AntiProcrastination";
+            });
+
+            builder.Services.AddHostedService(GetService);
+            IHost host = builder.Build();
+            host.Run();
+        }
+        public void StartMenu()
+        {
             var timerMenu = new TimerMenu();
             var timeBlockerMenu = new TimeBlockerMenu(Program.BlackList);
             var jobMenu = new JobMenu(Program.BlackList);
+            var sleepMenu = new SleepMenu();
             var mainMenu = new MainMenu();
-            var menuManager = new MenuManager(mainMenu, jobMenu, timeBlockerMenu, timerMenu);
+            var taskMenu = new TaskMenu();
+
+            var menuManager = new MenuManager();
+            menuManager.Add(timerMenu);
+            menuManager.Add(timeBlockerMenu);
+            menuManager.Add(jobMenu);
+            menuManager.Add(sleepMenu);
+            menuManager.Add(mainMenu);
+            menuManager.Add(taskMenu);
+
             ServiceLocator.Instance.AddComponent(menuManager);
         }
+
     }
 }

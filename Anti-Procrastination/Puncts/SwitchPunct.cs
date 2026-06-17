@@ -1,13 +1,16 @@
-﻿public class SwitchModulePunct : IPunct
-{
-    private ISwitch _module;
+﻿using Anti_Procrastination;
+using System.IO.Pipes;
 
-    public SwitchModulePunct(ISwitch module)
-    {
-        _module = module;
-    }
+public class SwitchModulePunct : IPunct
+{
+
+
     public void Activate()
     {
-        _module.Switch();
+        using var client = new NamedPipeClientStream(".","JobModule", PipeDirection.Out);
+        client.Connect();
+        using var writer = new StreamWriter(client);
+        writer.AutoFlush = true;
+        writer.WriteLine("Switch");
     }
 }

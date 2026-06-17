@@ -1,50 +1,14 @@
-﻿using Anti_Procrastination;
-using Anti_Procrastination.Services;
-using System.Diagnostics;
+﻿
+using Anti_Procrastination;
+using Microsoft.Extensions.Hosting;
 
-public abstract class Module
+
+
+public abstract class Module : IService
 {
-    protected List<string> _blackList;
-    protected List<Process> _bannedProcesses = new List<Process>();
-    protected Process[] _currentProcesses;
-    protected bool _isBlackList;
-    private ProgramListManager programListManager;
-    public Module()
-    {
-        programListManager = ServiceLocator.Instance.Get<ProgramListManager>();
-        _blackList = programListManager.ReadAList("BlackList.txt");
-        Program.BlackListChanged += OnBlackListChanged;
-        Logger.Debug($"{GetType().Name} Inited");
-
-    }
-
-    private void OnBlackListChanged()
-    {
-        _blackList = programListManager.ReadAList("BlackList.txt");
-
-    }
-
-
 
     public abstract void Activate();
-    protected async void HookProcesses()
-    {
+    public abstract void Init();
 
-        _currentProcesses = Process.GetProcesses();
-        for (int i = 0; i < _currentProcesses.Length; i++)
-        {
-            if (_blackList.Contains(_currentProcesses[i].ProcessName))
-            {
-                _bannedProcesses.Add(_currentProcesses[i]);
-                _isBlackList = true;
-
-            }
-
-        }
-        if (_bannedProcesses.Count == 0)
-        {
-            _isBlackList = false;
-        }
-
-    }
+    protected abstract void StartServer();
 }

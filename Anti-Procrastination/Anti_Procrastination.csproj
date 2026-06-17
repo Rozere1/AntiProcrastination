@@ -1,26 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>exe</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net8</TargetFramework>
     <RootNamespace>Anti_Procrastination</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseWindowsForms>False</UseWindowsForms>
-    <StartupObject>Anti_Procrastination.Program</StartupObject>
 	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 	<PlatformTarget>AnyCPU</PlatformTarget>
-	<ApplicationIcon>favicon.ico</ApplicationIcon>
-	<PackageIcon>ICo.png</PackageIcon>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Content Include="favicon.ico" />
-  </ItemGroup>
-
 
   <ItemGroup>
+  <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.7" />
+  <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.7" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="System.IO.Pipes" Version="4.3.0" />
   </ItemGroup>
 
 </Project>

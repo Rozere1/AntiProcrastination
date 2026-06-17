@@ -2,15 +2,16 @@
 
 public class MenuManager : IService
 {
-    private Dictionary<MenuVariant, Menu> menus = new Dictionary<MenuVariant, Menu>();
-    private MenuVariant currentVar;
-    private Stack<MenuVariant> prevVars = new Stack<MenuVariant>();
-    public MenuManager(MainMenu mainMenu, JobMenu jobMenu, TimeBlockerMenu timeBlockerMenu, TimerMenu timerMenu)
+    private Dictionary<string, Menu> menus = new Dictionary<string, Menu>();
+    private string currentVar;
+    private Stack<string> prevVars = new Stack<string>();
+    public void Add<T>(T menu) where T : Menu
     {
-        menus.Add(MenuVariant.MainMenu, mainMenu);
-        menus.Add(MenuVariant.JobMenu, jobMenu);
-        menus.Add(MenuVariant.TimeBlockerMenu, timeBlockerMenu);
-        menus.Add(MenuVariant.TimerMenu, timerMenu);
+        var name = typeof(T).Name;
+        if (!menus.ContainsKey(name))
+        {
+            menus.Add(name, menu);
+        }
     }
     public void GoToBack()
     {
@@ -19,22 +20,14 @@ public class MenuManager : IService
 
     }
 
-    public void Show(MenuVariant menuVar)
+    public void Show<T>() where T : Menu
     {
         prevVars.Push(currentVar);
-        currentVar = menuVar;
+        currentVar = typeof(T).Name;
         menus[currentVar].Show();
     }
     public void OpenCurrent()
     {
         menus[currentVar].Show();
     }
-}
-
-public enum MenuVariant
-{
-    MainMenu,
-    JobMenu,
-    TimeBlockerMenu,
-    TimerMenu
 }

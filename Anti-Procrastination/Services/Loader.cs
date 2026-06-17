@@ -1,42 +1,75 @@
-﻿using Newtonsoft.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-public class Saver
+﻿using Anti_Procrastination;
+using Newtonsoft.Json;
+public class SaverInstance
 {
-    public static void Save(object data)
+    public Settings settings;
+    public readonly string path = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\Anti-Procrastination\\settings.json";
+    public SaverInstance()
     {
-        var serializedObj = JsonConvert.SerializeObject(data, Formatting.Indented);
-        using var sw = new StreamWriter(new FileStream("Settings.json", FileMode.Create));
+        SaveSettings(SettingType.Default, null);
+    }
+    public void SaveSettings(SettingType type, object data)
+    {
+        var jsonSettings = new JsonSerializerSettings();
+        jsonSettings.Formatting = Formatting.Indented;
+        jsonSettings.TypeNameHandling = TypeNameHandling.All;
+        switch(type)
+        {
+            case SettingType.TimeRemaining:
+                settings.TimeRemaining = (int)data;
+                break;
+            case SettingType.UseTime:
+                settings.UseTime = (int)data;
+                break;
+            case SettingType.SleepHour:
+                settings.SleepHour = (int)data;
+                break;
+            case SettingType.IsJobRun:
+                settings.IsJobRun = (bool)data;
+                break;
+            case SettingType.Default:
+                settings = LoadSettings();
+                break;
+        }
+        var serializedObj = JsonConvert.SerializeObject(settings, jsonSettings);
+        using var sw = new StreamWriter(new FileStream(path, FileMode.OpenOrCreate));
         sw.WriteLine(serializedObj);
+        sw.Close();
+    }
+    
+     public  void SaveTask(Task taskData, string v)
+    {
+        throw new NotImplementedException();
+    }
+    public Settings LoadSettings()
+    {
+        using var sr = new StreamReader(path);
+        try
+        {
+            Settings data = JsonConvert.DeserializeObject<Settings>(sr.ReadToEnd());
+            sr.Close();
+            return data;
+        }
+        catch (Exception ex)
+        {
+            return new Settings();
+        }
 
     }
 }
-public class Loader
+public static class SaveManager
 {
-    private static T GetData<T>(object data)
-    {
-        if (data == null && typeof(T).GetConstructor(Type.EmptyTypes) != null)
-        {
-            data = typeof(T).GetConstructor(Type.EmptyTypes).Invoke(new object[] { });
-        }
-        return (T)data;
-    }
-    public static T Load<T>()
-    {
-        var fs = new FileStream("Settings.json", FileMode.OpenOrCreate);
-        using (var sr = new StreamReader(fs))
-        {
-            try
-            {
-                object data = JsonConvert.DeserializeObject<T>(sr.ReadToEnd());
-                return GetData<T>(data);
-            }
-            catch (Exception e)
-            {
-                Logger.Debug(e.Message);
-                
-                return GetData<T>(default);
-            }
-        }
+    public readonly static SaverInstance Instance = new SaverInstance();
+    
+    
+}
 
-    }
+
+public enum SettingType
+{
+    TimeRemaining,
+    UseTime,
+    SleepHour,
+    IsJobRun,
+    Default
 }

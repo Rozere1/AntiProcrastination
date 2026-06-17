@@ -1,24 +1,27 @@
 ﻿
 
-public class JobModule : Module, ISwitch, IService
+using Anti_Procrastination;
+
+public class JobModule : BlackListModule, ISwitch, IService
 {
     public ReactiveProperty<bool> IsRun { get; protected set; }
+
     private bool safeEnable;
     public async void Switch()
     {
         if (safeEnable)
             return;
-        IsRun.Value = !IsRun.Value;
-        if (IsRun.Value)
-        {
-            Activate();
-        }
     }
-
-    public JobModule() : base()
+    
+    public override void Init()
     {
         IsRun = new ReactiveProperty<bool>();
-
+        Update();
+    }
+    private void Update()
+    {
+        var settings = SaveManager.Instance.LoadSettings();
+        IsRun.Value = settings.IsJobRun;
     }
     public void SafeEnable()
     {
@@ -29,12 +32,12 @@ public class JobModule : Module, ISwitch, IService
 
     protected async void KillBlackListProcesess()
     {
-        if (_bannedProcesses.Count == 0)
+        if (BannedProcesses.Count == 0)
             return;
-        for (int i = 0; i < _bannedProcesses.Count; i++)
+        for (int i = 0; i < BannedProcesses.Count; i++)
         {
-            var process = _bannedProcesses[i];
-            _bannedProcesses.Remove(process);
+            var process = BannedProcesses[i];
+            BannedProcesses.Remove(process);
             process.CloseMainWindow();
             process.WaitForExit(5000);
 
@@ -43,8 +46,6 @@ public class JobModule : Module, ISwitch, IService
                 process.Kill();
                 process.WaitForExit();
             }
-
-            Logger.Debug(process.ProcessName + " Killed");
 
         }
 
@@ -56,11 +57,14 @@ public class JobModule : Module, ISwitch, IService
         while (IsRun.Value)
         {
             HookProcesses();
-            await Task.Run(KillBlackListProcesess);
+            await System.Threading.Tasks.Task.Run(KillBlackListProcesess);
 
-            await Task.Delay(1000);
+            await System.Threading.Tasks.Task.Delay(1000);
         }
     }
 
-
+    protected override void StartServer()
+    {
+        throw new NotImplementedException();
+    }
 }

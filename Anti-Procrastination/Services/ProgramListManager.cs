@@ -1,9 +1,9 @@
 ﻿namespace Anti_Procrastination.Services
 {
-    public class ProgramListManager : IService
+    public static class ProgramListManager 
     {
-        private readonly string path = @$"{Directory.GetCurrentDirectory()}\Lists";
-        public List<string> ReadAList(string file)
+        private static readonly string path = @$"{Directory.GetCurrentDirectory()}\Lists";
+        public  static List<string> ReadAList(string file)
         {
             var programList = new List<string>();
             var pathToFile = @$"{path}\{file}";
@@ -16,11 +16,15 @@
 
             try
             {
-                programList = streamReader.ReadToEnd().Split('\n', StringSplitOptions.TrimEntries).ToList();
+                programList = streamReader.ReadToEnd()
+                    .ToLower()
+                    .Split('\n', StringSplitOptions.TrimEntries)
+                    .ToList();
             }
             catch
             {
                 Console.WriteLine("Ошибка при чтении");
+
             }
             return programList;
 

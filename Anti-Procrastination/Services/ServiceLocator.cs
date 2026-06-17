@@ -30,12 +30,10 @@ public class ServiceLocator
         string name = typeof(T).Name;
         if (services.TryGetValue(name, out IService? value))
         {
-
             return (T)value;
         }
         else
         {
-            Logger.Debug("None Service to return");
             throw new NullReferenceException();
         }
     }

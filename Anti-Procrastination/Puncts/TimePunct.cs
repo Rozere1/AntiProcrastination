@@ -1,14 +1,20 @@
-﻿public class TimePunct : IPunct
+﻿using Anti_Procrastination;
+using Anti_Procrastination.Services;
+using System.IO.Pipes;
+
+public class TimePunct : IPunct
 {
-    private TimeBlockerModule _module;
-    public TimePunct(TimeBlockerModule module)
+    private Settings settings;
+    public TimePunct()
     {
-        _module = module;
+        settings = SaveManager.Instance.LoadSettings();
     }
     public void Activate()
     {
+
+        
         Console.Clear();
-        if (_module.CurrentTime >= _module.UseTime.Value * 0.15)
+        if (settings.TimeRemaining >= settings.UseTime * 0.15)
         {
             Console.WriteLine("Вы не можете поменять время из-за малого оставшегося времени");
             Console.ReadLine();
@@ -18,27 +24,63 @@
         try
         {
             int value = Convert.ToInt32(Console.ReadLine());
-            if (value > 25200)
+            if (value > 25200 || value < 600)
             {
-                Console.WriteLine("Слишком большое значение введите снова");
+                Console.WriteLine("Нельзя ввести данное значение");
                 Console.ReadKey();
                 Activate();
                 return;
             }
-            if( value < 600)
-            {
-                Console.WriteLine("Слишком маленькое значение");
-                Console.ReadKey();
-                Activate(); 
-                return;
-            }
-                _module.UseTime.Value = value;
+            settings.UseTime = value;
+            using var client = new NamedPipeClientStream(".", "TimeBlocker", PipeDirection.Out);
+            client.ConnectAsync();
+            using var writer = new StreamWriter(client);
+            writer.AutoFlush = true;
+            writer.WriteLine("Update");
         }
 
         catch(Exception ex)
         {
-            Logger.Debug($"{ex.Message} {ex.StackTrace}");
+            Console.WriteLine(ex.Message);
+            Console.ReadKey();
+            Activate();
+            return;
         }
         
+    }
+}
+public class SleepPunct : IPunct
+{
+
+    public void Activate()
+    {
+        Console.Clear();
+
+        Console.Write("Введите время использования в часах: ");
+        try
+        {
+            int value = Convert.ToInt32(Console.ReadLine());
+            if (value >= 24 || value < 0)
+            {
+                Console.WriteLine("Нельзя установить такое время");
+                Console.ReadLine();
+                SaveManager.Instance.SaveSettings(SettingType.SleepHour, value);
+                using var client = new NamedPipeClientStream(".", "Sleep", PipeDirection.Out);
+                client.Connect();
+                using var writer = new StreamWriter(client);
+                writer.AutoFlush = true;
+                writer.WriteLine("Update");
+                return;
+            }
+        }
+
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            Console.ReadKey();
+            Activate();
+            
+        }
+
     }
 }
