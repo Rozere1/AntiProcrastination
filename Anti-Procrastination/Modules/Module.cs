@@ -4,7 +4,7 @@ using Microsoft.Extensions.Hosting;
 
 
 
-public abstract class Module : IService
+public abstract class Module : IService, BackgroundService  
 {
 
     public abstract void Activate();

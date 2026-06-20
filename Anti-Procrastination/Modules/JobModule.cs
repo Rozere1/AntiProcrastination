@@ -1,9 +1,13 @@
 ﻿
 
+using System.Data;
+using System.Diagnostics.CodeAnalysis;
+using System.IO.Pipes;
 using Anti_Procrastination;
 
 public class JobModule : BlackListModule, ISwitch, IService
 {
+    private NamedPipeServerStream server;
     public ReactiveProperty<bool> IsRun { get; protected set; }
 
     private bool safeEnable;
@@ -13,14 +17,16 @@ public class JobModule : BlackListModule, ISwitch, IService
             return;
     }
     
-    public override void Init()
+    public async override void Init()
     {
         IsRun = new ReactiveProperty<bool>();
+        StartServer();
         Update();
+        await System.Threading.Tasks.Task.Run(ReadCommand);
     }
     private void Update()
     {
-        var settings = SaveManager.Instance.LoadSettings();
+        var settings = SaverManager.Instance.LoadSettings();
         IsRun.Value = settings.IsJobRun;
     }
     public void SafeEnable()
@@ -54,17 +60,42 @@ public class JobModule : BlackListModule, ISwitch, IService
 
     public async override void Activate()
     {
-        while (IsRun.Value)
-        {
-            HookProcesses();
-            await System.Threading.Tasks.Task.Run(KillBlackListProcesess);
-
-            await System.Threading.Tasks.Task.Delay(1000);
-        }
+        HookProcesses();
+        await System.Threading.Tasks.Task.Run(KillBlackListProcesess);
+        await System.Threading.Tasks.Task.Delay(1000);
     }
 
-    protected override void StartServer()
+    protected async override void StartServer()
     {
-        throw new NotImplementedException();
+        server = new NamedPipeServerStream("Job");
+    }
+    private async void ReadCommand()
+    {
+        while (true)
+        {
+            await server.WaitForConnectionAsync();
+            using var reader = new StreamReader(server);
+            var command = reader.ReadLine();
+            switch(command)
+            {
+                case "Update":
+                Update();
+                break;
+                case "Switch":
+                Switch();
+                break;
+                
+            }
+        }
+        
+    }
+
+    protected override async System.Threading.Tasks.Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while(!stoppingToken.IsCancellationRequested)      
+        {
+            await  System.Threading.Tasks.Task.Run(Activate);
+        }
+        server.Dispose();
     }
 }

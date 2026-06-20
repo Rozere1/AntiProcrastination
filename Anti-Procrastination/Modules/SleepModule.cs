@@ -23,7 +23,7 @@ public class SleepModule : Module
 
     private void Update()
     {
-        var settings = SaveManager.Instance.LoadSettings();
+        var settings = SaverManager.Instance.LoadSettings();
         Hours.Value = settings.SleepHour;
     }
 
@@ -45,14 +45,14 @@ public class SleepModule : Module
 
     protected override void StartServer()
     {
-        using var server = new NamedPipeServerStream("Sleep", PipeDirection.In);
+        var server = new NamedPipeServerStream("Sleep", PipeDirection.In);
         server.WaitForConnectionAsync();
-        using var reader = new StreamReader(server);
+        var reader = new StreamReader(server);
         if(reader.ReadLine() == "Update")
         {
             Update();
             Timer.Date = SetDate();
-            Timer.Start();
+            Activate();
         }    
     }
 
@@ -61,5 +61,11 @@ public class SleepModule : Module
         Hours = new ReactiveProperty<int>();
         Update();
         Timer = new ScheduleTimer(SetDate());
+    }
+
+    protected override System.Threading.Tasks.Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        Activate();
+        return System.Threading.Tasks.Task.CompletedTask;
     }
 }

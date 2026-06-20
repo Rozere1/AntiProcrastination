@@ -1,12 +1,23 @@
 ﻿using Anti_Procrastination;
 using Newtonsoft.Json;
-public class SaverInstance
+public class SaverManager
 {
+    public readonly static SaverManager Instance = new SaverManager();
     public Settings settings;
     public readonly string path = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\Anti-Procrastination\\settings.json";
-    public SaverInstance()
+    public SaverManager()
     {
-        SaveSettings(SettingType.Default, null);
+        var dataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Anti-Procrastination");
+        if (!Directory.Exists(dataPath))
+        {        
+            Directory.CreateDirectory(dataPath);
+        }
+        if (!File.Exists(path))
+        {
+            var file = File.Create(path);
+            file.Close();
+        }
+        SaveSettings(SettingType.Default, 0);
     }
     public void SaveSettings(SettingType type, object data)
     {
@@ -50,18 +61,12 @@ public class SaverInstance
             sr.Close();
             return data;
         }
-        catch (Exception ex)
+        catch 
         {
             return new Settings();
         }
 
     }
-}
-public static class SaveManager
-{
-    public readonly static SaverInstance Instance = new SaverInstance();
-    
-    
 }
 
 

@@ -8,9 +8,10 @@ public class SwitchModulePunct : IPunct
     public void Activate()
     {
         using var client = new NamedPipeClientStream(".","JobModule", PipeDirection.Out);
-        client.Connect();
+        client.ConnectAsync();
         using var writer = new StreamWriter(client);
         writer.AutoFlush = true;
         writer.WriteLine("Switch");
+        return;
     }
 }

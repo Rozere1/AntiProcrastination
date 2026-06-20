@@ -9,7 +9,7 @@ public class CreateTaskPunct : IPunct
         ChangeDeadline();
         Check();
         var taskData = new Task(1,"AS", DateTime.Now);
-        SaveManager.Instance.SaveTask(taskData, $"Tasks\\{name}.json");
+        SaverManager.Instance.SaveTask(taskData, $"Tasks\\{name}.json");
         
     }
     private void ChangeName()

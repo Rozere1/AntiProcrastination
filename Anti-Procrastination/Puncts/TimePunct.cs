@@ -7,7 +7,7 @@ public class TimePunct : IPunct
     private Settings settings;
     public TimePunct()
     {
-        settings = SaveManager.Instance.LoadSettings();
+        settings = SaverManager.Instance.LoadSettings();
     }
     public void Activate()
     {
@@ -64,7 +64,7 @@ public class SleepPunct : IPunct
             {
                 Console.WriteLine("Нельзя установить такое время");
                 Console.ReadLine();
-                SaveManager.Instance.SaveSettings(SettingType.SleepHour, value);
+                SaverManager.Instance.SaveSettings(SettingType.SleepHour, value);
                 using var client = new NamedPipeClientStream(".", "Sleep", PipeDirection.Out);
                 client.Connect();
                 using var writer = new StreamWriter(client);

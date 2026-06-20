@@ -63,7 +63,7 @@ namespace Anti_Procrastination
             
             var listDirPath = @$"{Directory.GetCurrentDirectory()}\Lists";
             var logsDirPath = @$"{Directory.GetCurrentDirectory()}\Logs";
-            var dataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Anti-Procrastination");
+            
             if (!Directory.Exists(logsDirPath))
             {
                 Directory.CreateDirectory(logsDirPath);
@@ -72,40 +72,15 @@ namespace Anti_Procrastination
             {
                 Directory.CreateDirectory(listDirPath);
             }
-            if (!Directory.Exists(dataPath))
-            {        
-                Directory.CreateDirectory(dataPath);
-            }
-                
-            if (!File.Exists(SaveManager.Instance.path))
-            {
-                var file = File.Create(SaveManager.Instance.path);
-                file.Close();
-            }
+
         }
     }
 
     public class Bootstrap
     {
-        private AntiProcrastinationService GetService(IServiceProvider provider)
+        private void GetService(IServiceProvider provider)
         {
-            var service = new AntiProcrastinationService();
-
-            var jobModule = new JobModule();
-            service.AddModule(jobModule);
-            ServiceLocator.Instance.AddComponent(jobModule);
-
-            var timeMod = new TimeBlockerModule();
-            service.AddModule(timeMod);
-
-            var sleepMod = new SleepModule();
-            service.AddModule(sleepMod);
-            ServiceLocator.Instance.AddComponent(sleepMod);
-
-            var taskMod = new TaskModule();
-            service.AddModule(taskMod);
             
-            return service;
         }
         public void StartService()
         {
@@ -114,9 +89,10 @@ namespace Anti_Procrastination
             builder.Services.AddWindowsService(options =>
             {
                 options.ServiceName = "AntiProcrastination";
+                builder.Services.AddHostedService<JobModule>();
             });
 
-            builder.Services.AddHostedService(GetService);
+            builder.Services.AddWindowsService();
             IHost host = builder.Build();
             host.Run();
         }

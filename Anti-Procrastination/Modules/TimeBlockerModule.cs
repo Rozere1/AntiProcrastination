@@ -8,6 +8,7 @@ public class TimeBlockerModule : BlackListModule
     public ReactiveProperty<int> UseTime { get; protected set; }
     public ReactiveProperty<int> RemainingTime = new ReactiveProperty<int>();
     public bool IsOvered { get; set; }
+    private NamedPipeServerStream server;
     
     private JobModule jobModule;
     private int defaultTime = 10800;
@@ -19,7 +20,7 @@ public class TimeBlockerModule : BlackListModule
     }
     private void Update()
     {
-        var settings = SaveManager.Instance.LoadSettings();
+        var settings = SaverManager.Instance.LoadSettings();
         settings.UseTime = UseTime.Value;
     }
     private void OnTimeOvered(object? sender, ElapsedEventArgs e)
@@ -54,7 +55,7 @@ public class TimeBlockerModule : BlackListModule
 
     }
 
-    private ElapsedEventHandler Reset()
+    private ElapsedEventHandler? Reset()
     {
         RemainingTime.Value = UseTime.Value;
         return default;
@@ -71,7 +72,7 @@ public class TimeBlockerModule : BlackListModule
                 RemainingTime.Value -= 1;
                 if (RemainingTime.Value <= 0)
                 {
-                    await System.Threading.Tasks.Task.Run(KillAllProcesses);
+                    KillAllProcesses();
                     IsOvered = true;
                     break;
                 }
@@ -92,16 +93,29 @@ public class TimeBlockerModule : BlackListModule
 
     protected override async void StartServer()
     {
-        using var server = new NamedPipeServerStream("TimeBlocker", PipeDirection.In);
-        server.WaitForConnectionAsync();
-        using var reader = new StreamReader(server);
-        string command = await reader.ReadLineAsync();
-        
-        if (command == "Update")
+        server = new NamedPipeServerStream("TimeBlocker", PipeDirection.In);
+
+    }
+    private async void ReadCommand()
+    {
+        await server.WaitForConnectionAsync();
+        var reader = new StreamReader(server);
+        string command = reader.ReadLine();
+        switch(command)
         {
+            case "Update":
             Update();
-            
+            break;
         }
         
+    }
+    protected override async System.Threading.Tasks.Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            await System.Threading.Tasks.Task.Run(Activate);
+            ReadCommand();
+        }
+        server.Dispose();
     }
 }
