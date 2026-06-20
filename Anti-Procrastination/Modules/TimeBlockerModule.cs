@@ -99,8 +99,8 @@ public class TimeBlockerModule : BlackListModule
     private async void ReadCommand()
     {
         await server.WaitForConnectionAsync();
-        var reader = new StreamReader(server);
-        string command = reader.ReadLine();
+        using var reader = new StreamReader(server);
+        var command = reader.ReadLine();
         switch(command)
         {
             case "Update":
