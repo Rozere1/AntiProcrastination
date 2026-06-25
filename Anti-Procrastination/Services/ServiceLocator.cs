@@ -2,7 +2,6 @@
 
 public class ServiceLocator
 {
-    public static readonly ServiceLocator Instance = new ServiceLocator();
     private Dictionary<string, IService> services = new Dictionary<string, IService>();
 
     public void AddComponent<T>(T service) where T : IService

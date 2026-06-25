@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "Anti_Procrastination": {
-      "commandName": "Project",
-      "commandLineArgs": "/start"
-    }
-  }
-}

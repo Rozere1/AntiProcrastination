@@ -1,18 +1,26 @@
 ﻿using Anti_Procrastination;
 using System.Diagnostics;
 using System.IO.Pipes;
+using System.Threading.Tasks;
 using System.Timers;
 
 public class SleepModule : Module
 {
-    public ReactiveProperty<int> Hours { get; private set; }
+    
+    public int Hours { get; private set; }
     public ScheduleTimer Timer { get; private set; }
- 
+    public SleepModule()
+    {
+        server = new NamedPipeServerStream("Sleep", PipeDirection.In);
+        Update();
+        Timer = new ScheduleTimer(SetDate());
+        Timer.timer.Elapsed += OnTimeOvered;
+    }
     private DateTime SetDate()
     {
         
         var now = DateTime.UtcNow;
-        var date = new DateTime(now.Year, now.Month, now.Day, Hours.Value, 0, 0);
+        var date = new DateTime(now.Year, now.Month, now.Day, Hours, 0, 0);
         return date;
     }
     
@@ -24,7 +32,7 @@ public class SleepModule : Module
     private void Update()
     {
         var settings = SaverManager.Instance.LoadSettings();
-        Hours.Value = settings.SleepHour;
+        Hours = settings.SleepHour;
     }
 
 
@@ -43,29 +51,39 @@ public class SleepModule : Module
         Process.Start(shut);
     }
 
-    protected override void StartServer()
-    {
-        var server = new NamedPipeServerStream("Sleep", PipeDirection.In);
-        server.WaitForConnectionAsync();
-        var reader = new StreamReader(server);
-        if(reader.ReadLine() == "Update")
-        {
-            Update();
-            Timer.Date = SetDate();
-            Activate();
-        }    
-    }
 
-    public override void Init()
-    {
-        Hours = new ReactiveProperty<int>();
-        Update();
-        Timer = new ScheduleTimer(SetDate());
-    }
 
-    protected override System.Threading.Tasks.Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         Activate();
-        return System.Threading.Tasks.Task.CompletedTask;
+        try
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                await ReadCommand(stoppingToken);
+            }
+        }
+        catch(OperationCanceledException)
+        {
+                
+        }
+    }
+    public override async Task StopAsync(CancellationToken stoppingToken)
+    {
+        server.Dispose();
+        Timer.timer.Elapsed -= OnTimeOvered;
+        Timer.timer.Dispose();
+        await base.StopAsync(stoppingToken);
+    }
+
+    protected override void CheckCommand(string? command)
+    {
+        switch(command)
+        {
+            case "update":
+            Update();
+            break;
+            
+        }
     }
 }

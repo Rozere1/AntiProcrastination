@@ -6,6 +6,6 @@ public class GoToNextMenuPunct<T> : IPunct where T : Menu
 {
     public void Activate()
     {
-        ServiceLocator.Instance.Get<MenuManager>().Show<T>();
+        MenuManager.Instance.Show<T>();
     }
 }

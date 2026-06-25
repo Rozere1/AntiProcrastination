@@ -5,117 +5,102 @@ using System.Timers;
 
 public class TimeBlockerModule : BlackListModule
 {
-    public ReactiveProperty<int> UseTime { get; protected set; }
-    public ReactiveProperty<int> RemainingTime = new ReactiveProperty<int>();
-    public bool IsOvered { get; set; }
-    private NamedPipeServerStream server;
-    
-    private JobModule jobModule;
-    private int defaultTime = 10800;
-    public override void Init()
-    {
-        UseTime = new ReactiveProperty<int>();
-        Update();
-
-    }
-    private void Update()
-    {
-        var settings = SaverManager.Instance.LoadSettings();
-        settings.UseTime = UseTime.Value;
-    }
-    private void OnTimeOvered(object? sender, ElapsedEventArgs e)
-    {
-        RemainingTime.Value = UseTime.Value;
-    }
-
-    private void OnQuit(object? sender, EventArgs e)
-    {        
-        
-    }
-
-    public async override void Activate()
+    private ScheduleTimer Timer;
+    public TimeBlockerModule(JobModule module) : base()
     {
 
         var now = DateTime.Now;
         var date = new DateTime(now.Year, now.Month, now.Day + 1, 0, 0, 0);
-        var timer = new ScheduleTimer(date);
-        timer.OnTimeOver += Reset();
-        jobModule = ServiceLocator.Instance.Get<JobModule>();
-        if (UseTime.Value <= 600)
-            UseTime.Value = defaultTime;
-        if (Program.IsSetting)
-            return;
+        Timer = new ScheduleTimer(date);
+        Timer.Start();
+        Timer.timer.Elapsed += Reset;
+        server = new NamedPipeServerStream("TimeBlocker", PipeDirection.In);
+        jobModule = module;
+        Update();
+        
+    }
+    public int UseTime;
+    public int RemainingTime;
+    public bool IsOvered { get; set; }
+    
+    private JobModule jobModule;
+    private void Update()
+    {
+        var settings = SaverManager.Instance.LoadSettings();
+        UseTime = settings.UseTime;
+        RemainingTime = settings.TimeRemaining;
+    }
+
+
+    public async override void Activate()
+    {
         if (IsOvered)
         {
             KillAllProcesses();
             return;
         }
-        await System.Threading.Tasks.Task.Run(HookProcesses);
-        await System.Threading.Tasks.Task.Run(StartTimer);
+        HookProcesses();
+        StartTimer();
 
     }
 
-    private ElapsedEventHandler? Reset()
+    private void Reset(object? sender, ElapsedEventArgs e)
     {
-        RemainingTime.Value = UseTime.Value;
-        return default;
+        RemainingTime = UseTime;
+
     }
+
 
     private async void StartTimer()
     {
-
-        while (true)
+        if (IsBlackList)
         {
-            if (IsBlackList)
+            RemainingTime -= 1;
+            if (RemainingTime <= 0)
             {
-                await System.Threading.Tasks.Task.Delay(1000);
-                RemainingTime.Value -= 1;
-                if (RemainingTime.Value <= 0)
-                {
-                    KillAllProcesses();
-                    IsOvered = true;
-                    break;
-                }
+                KillAllProcesses();
+                IsOvered = true;
             }
-            else
-            {
-                await System.Threading.Tasks.Task.Delay(1000);
-            }
-
         }
-
     }
     private void KillAllProcesses()
     {
         jobModule.SafeEnable();
         jobModule.Activate();
     }
-
-    protected override async void StartServer()
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        server = new NamedPipeServerStream("TimeBlocker", PipeDirection.In);
-
+        try
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                await Task.Delay(1000, stoppingToken);
+                Activate();
+                await ReadCommand(stoppingToken);
+            }
+        }
+        catch(OperationCanceledException)
+        {
+                
+        }
     }
-    private async void ReadCommand()
+    public override async Task StopAsync(CancellationToken stoppingToken)
     {
-        await server.WaitForConnectionAsync();
-        using var reader = new StreamReader(server);
-        var command = reader.ReadLine();
+
+        server.Dispose();
+        Timer.timer.Elapsed -= Reset;
+        Timer.timer.Dispose();
+        SaverManager.Instance.SaveSettings(SettingType.TimeRemaining, RemainingTime);
+        await base.StopAsync(stoppingToken);
+    }
+
+    protected override void CheckCommand(string? command)
+    {
         switch(command)
         {
-            case "Update":
+            case "update":
             Update();
             break;
         }
-        
-    }
-    protected override async System.Threading.Tasks.Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await System.Threading.Tasks.Task.Run(Activate);
-            ReadCommand();
-        }
-        server.Dispose();
     }
 }

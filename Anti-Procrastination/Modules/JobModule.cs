@@ -2,41 +2,39 @@
 
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
 using System.IO.Pipes;
 using Anti_Procrastination;
+using Anti_Procrastination.Services;
 
 public class JobModule : BlackListModule, ISwitch, IService
 {
-    private NamedPipeServerStream server;
-    public ReactiveProperty<bool> IsRun { get; protected set; }
-
+    public bool IsRun { get; protected set; }
+    public JobModule() : base()
+    {
+        server = new NamedPipeServerStream("Job", PipeDirection.In);
+        Update();
+    }
     private bool safeEnable;
-    public async void Switch()
+    public void Switch()
     {
         if (safeEnable)
             return;
     }
     
-    public async override void Init()
-    {
-        IsRun = new ReactiveProperty<bool>();
-        StartServer();
-        Update();
-        await System.Threading.Tasks.Task.Run(ReadCommand);
-    }
     private void Update()
     {
         var settings = SaverManager.Instance.LoadSettings();
-        IsRun.Value = settings.IsJobRun;
+        IsRun = settings.IsJobRun;
     }
     public void SafeEnable()
     {
         safeEnable = true;
-        IsRun.Value = true;
+        IsRun = true;
 
     }
 
-    protected async void KillBlackListProcesess()
+    protected void KillBlackListProcesess()
     {
         if (BannedProcesses.Count == 0)
             return;
@@ -50,7 +48,6 @@ public class JobModule : BlackListModule, ISwitch, IService
             if (!process.HasExited)
             {
                 process.Kill();
-                process.WaitForExit();
             }
 
         }
@@ -60,42 +57,48 @@ public class JobModule : BlackListModule, ISwitch, IService
 
     public async override void Activate()
     {
+        if(!IsRun)
+            return;
         HookProcesses();
-        await System.Threading.Tasks.Task.Run(KillBlackListProcesess);
-        await System.Threading.Tasks.Task.Delay(1000);
-    }
-
-    protected async override void StartServer()
-    {
-        server = new NamedPipeServerStream("Job");
-    }
-    private async void ReadCommand()
-    {
-        while (true)
-        {
-            await server.WaitForConnectionAsync();
-            using var reader = new StreamReader(server);
-            var command = reader.ReadLine();
-            switch(command)
-            {
-                case "Update":
-                Update();
-                break;
-                case "Switch":
-                Switch();
-                break;
-                
-            }
-        }
+        KillBlackListProcesess();
         
     }
 
-    protected override async System.Threading.Tasks.Task ExecuteAsync(CancellationToken stoppingToken)
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        while(!stoppingToken.IsCancellationRequested)      
+        try
         {
-            await  System.Threading.Tasks.Task.Run(Activate);
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                Activate();
+                await ReadCommand(stoppingToken);
+                await Task.Delay(1000, stoppingToken);
+            }
         }
+        catch(OperationCanceledException)
+        {
+                
+        }
+        
+    }
+    public override async Task StopAsync(CancellationToken stoppingToken)
+    {
         server.Dispose();
+        SaverManager.Instance.SaveSettings(SettingType.IsJobRun, IsRun);
+        await base.StopAsync(stoppingToken);
+    }
+
+    protected override void CheckCommand(string? command)
+    {
+        switch(command)
+        {
+            case "update":
+            Update();
+            break;
+            case "switch":
+            Switch();
+            break;
+        }
     }
 }

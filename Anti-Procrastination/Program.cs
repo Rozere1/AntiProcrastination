@@ -1,53 +1,50 @@
 ﻿using Anti_Procrastination.Menus;
 using Anti_Procrastination.Services;
 using Microsoft.Extensions.DependencyInjection;
+using System.ServiceProcess;
 using Microsoft.Extensions.Hosting;
+using System.Data.Common;
 namespace Anti_Procrastination
 {
     public class Program
     {
         public static readonly string BlackList = @$"{Directory.GetCurrentDirectory()}\Lists\BlackList.txt";
         public static event Action<object> FileChanged;
-        public const string Settings = "settings.json";
         public static bool IsOpen { get; private set; }
         public static bool IsSetting { get; private set; }
         private static void Main(params string[] args)
         {
             Validate();
             var bootstrap = new Bootstrap();
-
-            using var settingWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory(), Settings);
-            settingWatcher.NotifyFilter = NotifyFilters.LastWrite;
-            settingWatcher.Changed += OnFileChanged;
-            settingWatcher.EnableRaisingEvents = true;
-            if (args.Length == 0)
+            if (args.Length == 1222)
             {
+                ServiceController[] services = ServiceController.GetServices();
+                if(!services.Any(s => s.ServiceName.Equals("Anti-Procrastination", StringComparison.OrdinalIgnoreCase)))
+                {
+                    CreateService punct = new CreateService();
+                    punct.Activate();
+                }
                 IsOpen = true;
                 IsSetting = true;
                 bootstrap.StartMenu();
-                MenuManager menuManager = ServiceLocator.Instance.Get<MenuManager>();
-                menuManager.Show<MainMenu>();
+                MenuManager.Instance.Show<MainMenu>();
 
                 while (IsOpen)
                 {
-                    menuManager.OpenCurrent();
+                    MenuManager.Instance.OpenCurrent();
                 }
             }
-            else if (args[0] == "/start")
+            else
             {
                 using var fileWatcher = new FileSystemWatcher(@$"{Directory.GetCurrentDirectory()}\Lists");
 
                 fileWatcher.NotifyFilter = NotifyFilters.LastWrite;
                 fileWatcher.Changed += OnFileChanged;
                 fileWatcher.EnableRaisingEvents = true;
-
                 bootstrap.StartService();
-
             }
 
         }
-
-
         private static void OnFileChanged(object sender, FileSystemEventArgs e)
         {
             FileChanged?.Invoke(sender);
@@ -63,7 +60,6 @@ namespace Anti_Procrastination
             
             var listDirPath = @$"{Directory.GetCurrentDirectory()}\Lists";
             var logsDirPath = @$"{Directory.GetCurrentDirectory()}\Logs";
-            
             if (!Directory.Exists(logsDirPath))
             {
                 Directory.CreateDirectory(logsDirPath);
@@ -75,27 +71,31 @@ namespace Anti_Procrastination
 
         }
     }
-
+    
     public class Bootstrap
     {
-        private void GetService(IServiceProvider provider)
-        {
-            
-        }
+        private IHostApplicationLifetime lifetime;
         public void StartService()
         {
 
             HostApplicationBuilder builder = Host.CreateApplicationBuilder();
             builder.Services.AddWindowsService(options =>
             {
-                options.ServiceName = "AntiProcrastination";
-                builder.Services.AddHostedService<JobModule>();
+                options.ServiceName = "Anti-Procrastination";
+                
             });
-
-            builder.Services.AddWindowsService();
+            builder.Services.AddSingleton<JobModule>();
+            builder.Services.AddHostedService(sp => sp.GetRequiredService<JobModule>());
+            
+            builder.Services.AddHostedService<TimeBlockerModule>();
+            builder.Services.AddHostedService<SleepModule>();
+            builder.Services.AddHostedService<GoalModule>();
+            
             IHost host = builder.Build();
+            lifetime = host.Services.GetRequiredService<IHostApplicationLifetime>();
             host.Run();
         }
+
         public void StartMenu()
         {
             var timerMenu = new TimerMenu();
@@ -112,9 +112,7 @@ namespace Anti_Procrastination
             menuManager.Add(sleepMenu);
             menuManager.Add(mainMenu);
             menuManager.Add(taskMenu);
-
-            ServiceLocator.Instance.AddComponent(menuManager);
+            MenuManager.Instance = menuManager;
         }
-
     }
 }

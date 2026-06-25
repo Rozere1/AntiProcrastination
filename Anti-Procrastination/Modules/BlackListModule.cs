@@ -39,6 +39,5 @@ public abstract class BlackListModule : Module
         {
             IsBlackList = false;
         }
-
     }
 }

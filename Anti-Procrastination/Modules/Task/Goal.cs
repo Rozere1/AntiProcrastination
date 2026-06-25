@@ -1,9 +1,9 @@
-﻿public class Task
+﻿public struct Goal
 {
     public int Id { get; set; }
     public string Name { get; set; }
     public DateTime Deadline { get; set; }
-    public Task(int id, string name, DateTime deadline)
+    public Goal(int id, string name, DateTime deadline)
     {
         Id = id;
         Name = name;

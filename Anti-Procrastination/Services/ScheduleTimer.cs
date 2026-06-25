@@ -2,18 +2,16 @@
 public class ScheduleTimer
 {
     public DateTime Date { get; set; }
-    public System.Timers.ElapsedEventHandler OnTimeOver;
-    private System.Timers.Timer timer;
+    public System.Timers.Timer timer;
     public ScheduleTimer(DateTime date)
     {
         Date = date;
         timer = new System.Timers.Timer();
     }
     
-    public async void Start()
+    public void Start()
     {
         var substactedTime = Date.Subtract(DateTime.Now).TotalMilliseconds;
-        timer.Elapsed += OnTimeOver;
         timer.AutoReset = false;
         if (substactedTime <= 0)
         {

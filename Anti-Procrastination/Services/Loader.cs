@@ -48,7 +48,7 @@ public class SaverManager
         sw.Close();
     }
     
-     public  void SaveTask(Task taskData, string v)
+     public  void SaveTask(Goal taskData, string v)
     {
         throw new NotImplementedException();
     }

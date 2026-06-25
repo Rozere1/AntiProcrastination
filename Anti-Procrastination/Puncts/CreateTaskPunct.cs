@@ -8,7 +8,7 @@ public class CreateTaskPunct : IPunct
         ChangeName();
         ChangeDeadline();
         Check();
-        var taskData = new Task(1,"AS", DateTime.Now);
+        var taskData = new Goal(1,"AS", DateTime.Now);
         SaverManager.Instance.SaveTask(taskData, $"Tasks\\{name}.json");
         
     }
