@@ -1,29 +1,28 @@
-﻿using Anti_Procrastination;
-using System.Diagnostics;
-using System.IO.Pipes;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using System.Timers;
 
 public class SleepModule : Module
 {
-    
+
     public int Hours { get; private set; }
     public ScheduleTimer Timer { get; private set; }
-    public SleepModule()
+    public SleepModule() : base()
     {
-        server = new NamedPipeServerStream("Sleep", PipeDirection.In);
+        pipeName = "Sleep";
+        Init();
         Update();
         Timer = new ScheduleTimer(SetDate());
         Timer.timer.Elapsed += OnTimeOvered;
+
     }
     private DateTime SetDate()
     {
-        
+
         var now = DateTime.UtcNow;
         var date = new DateTime(now.Year, now.Month, now.Day, Hours, 0, 0);
         return date;
     }
-    
+
     public override void Activate()
     {
         Timer.Start();
@@ -63,9 +62,9 @@ public class SleepModule : Module
                 await ReadCommand(stoppingToken);
             }
         }
-        catch(OperationCanceledException)
+        catch (OperationCanceledException)
         {
-                
+
         }
     }
     public override async Task StopAsync(CancellationToken stoppingToken)
@@ -78,12 +77,12 @@ public class SleepModule : Module
 
     protected override void CheckCommand(string? command)
     {
-        switch(command)
+        switch (command)
         {
             case "update":
-            Update();
-            break;
-            
+                Update();
+                break;
+
         }
     }
 }

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>Anti_Procrastination</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -13,13 +13,14 @@
     <IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>
     <IlcDisableReflection>true</IlcDisableReflection>
     <StackTraceSupport>false</StackTraceSupport>
-
     <IlcGenerateMstatFile>true</IlcGenerateMstatFile>
     <IlcGenerateDgmlFile>true</IlcGenerateDgmlFile>
     <IlcGenerateMapFile>true</IlcGenerateMapFile>
     <IlcDumpGeneratedIL>true</IlcDumpGeneratedIL>   
 	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 	<PlatformTarget>AnyCPU</PlatformTarget>
+	<ApplicationIcon>favicon.ico</ApplicationIcon>
+	<ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
 
@@ -28,6 +29,21 @@
   <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.7" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="System.IO.Pipes" Version="4.3.0" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <EditorConfigFiles Remove="C:\Users\Rozere1\Anti-Procrastination\AntiProcrastination\Anti-Procrastination\.editorconfig" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Content Include="favicon.ico" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <None Include="C:\Users\Rozere1\Anti-Procrastination\AntiProcrastination\Anti-Procrastination\.editorconfig" />
   </ItemGroup>
 
 </Project>

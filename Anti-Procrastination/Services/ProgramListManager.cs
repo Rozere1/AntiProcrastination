@@ -1,9 +1,9 @@
 ﻿namespace Anti_Procrastination.Services
 {
-    public static class ProgramListManager 
+    public static class ProgramListManager
     {
         private static readonly string path = @$"{Directory.GetCurrentDirectory()}\Lists";
-        public  static List<string> ReadAList(string file)
+        public static List<string> ReadAList(string file)
         {
             var programList = new List<string>();
             var pathToFile = @$"{path}\{file}";

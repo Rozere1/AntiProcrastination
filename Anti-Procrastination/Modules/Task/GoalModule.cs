@@ -1,27 +1,23 @@
-﻿
-using System.IO.Pipes;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
-
-public class GoalModule : Module
+﻿public class GoalModule : Module
 {
     private List<Goal> tasks = new List<Goal>(10);
     public GoalModule()
     {
-        server = new NamedPipeServerStream("Goal", PipeDirection.In);
+        pipeName = "Goal";
+        Init();
     }
     public override void Activate()
     {
-        
+
     }
 
     protected override void CheckCommand(string? command)
     {
-        switch(command)
+        switch (command)
         {
             case "update":
-            Update();
-            break;
+                Update();
+                break;
         }
     }
 
@@ -30,18 +26,18 @@ public class GoalModule : Module
         try
         {
             Activate();
-            
+
             await ReadCommand(stoppingToken);
         }
         catch
         {
-            
+
         }
-        
+
     }
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        if(server.IsConnected)
+        if (server.IsConnected)
         {
             server.Disconnect();
         }
@@ -50,10 +46,10 @@ public class GoalModule : Module
     }
     private void ActivateTask()
     {
-        
+
     }
     private void Update()
     {
-        
+
     }
 }

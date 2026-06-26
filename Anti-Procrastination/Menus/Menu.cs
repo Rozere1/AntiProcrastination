@@ -21,12 +21,11 @@
         {
             var key = Convert.ToInt32(Console.ReadLine());
             _punctsCommand[key - 1].Activate();
-
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-
-            Console.Write($"Произошла ошибка: {e.Message}\n{e.StackTrace}");
+            Console.WriteLine($"Произошла ошибка: {ex.Message}\n{ex.StackTrace}");
+            Console.WriteLine("Нажмите, чтобы продолжить");
             Console.ReadKey();
         }
     }
@@ -37,14 +36,14 @@
 
             return;
         }
-        _puncts.Add($"{id+1}. {punct}");
+        _puncts.Add($"{id + 1}. {punct}");
         _punctsCommand.Add(id, punctCommand);
     }
     protected void ChangePunct(int id, string changed)
     {
         if (_puncts[id] != null)
         {
-            _puncts[id] = $"{id+1}. {changed}";
+            _puncts[id] = $"{id + 1}. {changed}";
         }
         else
         {

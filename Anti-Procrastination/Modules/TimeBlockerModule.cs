@@ -1,7 +1,4 @@
-﻿using Anti_Procrastination;
-using Anti_Procrastination.Services;
-using System.IO.Pipes;
-using System.Timers;
+﻿using System.Timers;
 
 public class TimeBlockerModule : BlackListModule
 {
@@ -14,15 +11,16 @@ public class TimeBlockerModule : BlackListModule
         Timer = new ScheduleTimer(date);
         Timer.Start();
         Timer.timer.Elapsed += Reset;
-        server = new NamedPipeServerStream("TimeBlocker", PipeDirection.In);
+        pipeName = "TimeBlocker";
         jobModule = module;
+        Init();
         Update();
-        
+
     }
     public int UseTime;
     public int RemainingTime;
     public bool IsOvered { get; set; }
-    
+
     private JobModule jobModule;
     private void Update()
     {
@@ -79,9 +77,9 @@ public class TimeBlockerModule : BlackListModule
                 await ReadCommand(stoppingToken);
             }
         }
-        catch(OperationCanceledException)
+        catch (OperationCanceledException)
         {
-                
+
         }
     }
     public override async Task StopAsync(CancellationToken stoppingToken)
@@ -96,11 +94,11 @@ public class TimeBlockerModule : BlackListModule
 
     protected override void CheckCommand(string? command)
     {
-        switch(command)
+        switch (command)
         {
             case "update":
-            Update();
-            break;
+                Update();
+                break;
         }
     }
 }

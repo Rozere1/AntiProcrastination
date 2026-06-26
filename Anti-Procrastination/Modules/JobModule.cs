@@ -1,18 +1,10 @@
-﻿
-
-using System.Data;
-using System.Diagnostics.CodeAnalysis;
-using System.Drawing;
-using System.IO.Pipes;
-using Anti_Procrastination;
-using Anti_Procrastination.Services;
-
-public class JobModule : BlackListModule, ISwitch, IService
+﻿public class JobModule : BlackListModule, ISwitch, IService
 {
     public bool IsRun { get; protected set; }
     public JobModule() : base()
     {
-        server = new NamedPipeServerStream("Job", PipeDirection.In);
+        pipeName = "Job";
+        Init();
         Update();
     }
     private bool safeEnable;
@@ -20,8 +12,10 @@ public class JobModule : BlackListModule, ISwitch, IService
     {
         if (safeEnable)
             return;
+        IsRun = !IsRun;
+        SaverManager.Instance.SaveSettings(SettingType.IsJobRun, IsRun);
     }
-    
+
     private void Update()
     {
         var settings = SaverManager.Instance.LoadSettings();
@@ -57,11 +51,11 @@ public class JobModule : BlackListModule, ISwitch, IService
 
     public async override void Activate()
     {
-        if(!IsRun)
+        if (!IsRun)
             return;
         HookProcesses();
         KillBlackListProcesess();
-        
+
     }
 
 
@@ -76,11 +70,11 @@ public class JobModule : BlackListModule, ISwitch, IService
                 await Task.Delay(1000, stoppingToken);
             }
         }
-        catch(OperationCanceledException)
+        catch (OperationCanceledException)
         {
-                
+
         }
-        
+
     }
     public override async Task StopAsync(CancellationToken stoppingToken)
     {
@@ -91,14 +85,14 @@ public class JobModule : BlackListModule, ISwitch, IService
 
     protected override void CheckCommand(string? command)
     {
-        switch(command)
+        switch (command)
         {
             case "update":
-            Update();
-            break;
+                Update();
+                break;
             case "switch":
-            Switch();
-            break;
+                Switch();
+                break;
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.Timers;
-public class ScheduleTimer
+﻿public class ScheduleTimer
 {
     public DateTime Date { get; set; }
     public System.Timers.Timer timer;
@@ -8,7 +7,7 @@ public class ScheduleTimer
         Date = date;
         timer = new System.Timers.Timer();
     }
-    
+
     public void Start()
     {
         var substactedTime = Date.Subtract(DateTime.Now).TotalMilliseconds;

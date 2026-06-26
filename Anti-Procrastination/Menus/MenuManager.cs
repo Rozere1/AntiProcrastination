@@ -1,12 +1,9 @@
-﻿using Anti_Procrastination.Menus;
-
-public class MenuManager : IService
+﻿public class MenuManager : IService
 {
     public static MenuManager Instance;
     private Dictionary<string, Menu> menus = new Dictionary<string, Menu>();
     private string currentVar;
     private Stack<string> prevVars = new Stack<string>();
-
     public void Add<T>(T menu) where T : Menu
     {
         var name = typeof(T).Name;

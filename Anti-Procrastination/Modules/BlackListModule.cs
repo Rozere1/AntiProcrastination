@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 public abstract class BlackListModule : Module
 {
-    
+
     public List<string> BlackList;
     public List<Process> BannedProcesses = new List<Process>();
     public Process[] CurrentProcesses;

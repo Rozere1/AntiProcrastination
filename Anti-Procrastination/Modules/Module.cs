@@ -1,21 +1,27 @@
 ﻿
-using System.IO.Pipes;
-using Anti_Procrastination;
 using Microsoft.Extensions.Hosting;
+using System.IO.Pipes;
 
 
 
-public abstract class Module : BackgroundService, IService 
+public abstract class Module : BackgroundService, IService
 {
     protected abstract void CheckCommand(string? command);
     protected NamedPipeServerStream server;
+    protected string pipeName;
+    protected void Init()
+    {
+        server = new NamedPipeServerStream(pipeName, PipeDirection.In);
+    }
     public abstract void Activate();
     protected async Task ReadCommand(CancellationToken stoppingToken)
     {
         await server.WaitForConnectionAsync(stoppingToken);
-        using var reader = new StreamReader(server);
-        var command = reader.ReadLine();
-        CheckCommand(command);
+        var reader = new StreamReader(server);
+        var command = await reader.ReadLineAsync();
+        if (command != null)
+            CheckCommand(command.ToLower());
+        server.Disconnect();
     }
 
 }

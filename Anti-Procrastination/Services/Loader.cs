@@ -1,5 +1,4 @@
-﻿using Anti_Procrastination;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 public class SaverManager
 {
     public readonly static SaverManager Instance = new SaverManager();
@@ -9,7 +8,7 @@ public class SaverManager
     {
         var dataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Anti-Procrastination");
         if (!Directory.Exists(dataPath))
-        {        
+        {
             Directory.CreateDirectory(dataPath);
         }
         if (!File.Exists(path))
@@ -24,7 +23,7 @@ public class SaverManager
         var jsonSettings = new JsonSerializerSettings();
         jsonSettings.Formatting = Formatting.Indented;
         jsonSettings.TypeNameHandling = TypeNameHandling.All;
-        switch(type)
+        switch (type)
         {
             case SettingType.TimeRemaining:
                 settings.TimeRemaining = (int)data;
@@ -47,8 +46,8 @@ public class SaverManager
         sw.WriteLine(serializedObj);
         sw.Close();
     }
-    
-     public  void SaveTask(Goal taskData, string v)
+
+    public void SaveTask(Goal taskData, string v)
     {
         throw new NotImplementedException();
     }
@@ -59,9 +58,10 @@ public class SaverManager
         {
             Settings data = JsonConvert.DeserializeObject<Settings>(sr.ReadToEnd());
             sr.Close();
+            settings = data;
             return data;
         }
-        catch 
+        catch
         {
             return new Settings();
         }

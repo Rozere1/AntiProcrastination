@@ -1,9 +1,7 @@
 ﻿using Anti_Procrastination.Menus;
-using Anti_Procrastination.Services;
 using Microsoft.Extensions.DependencyInjection;
-using System.ServiceProcess;
 using Microsoft.Extensions.Hosting;
-using System.Data.Common;
+using System.ServiceProcess;
 namespace Anti_Procrastination
 {
     public class Program
@@ -16,10 +14,10 @@ namespace Anti_Procrastination
         {
             Validate();
             var bootstrap = new Bootstrap();
-            if (args.Length == 1222)
+            if (args.Length == 0)
             {
-                ServiceController[] services = ServiceController.GetServices();
-                if(!services.Any(s => s.ServiceName.Equals("Anti-Procrastination", StringComparison.OrdinalIgnoreCase)))
+                var services = ServiceController.GetServices();
+                if (!services.Any(s => s.ServiceName.Equals("Anti-Procrastination", StringComparison.OrdinalIgnoreCase)))
                 {
                     CreateService punct = new CreateService();
                     punct.Activate();
@@ -57,7 +55,7 @@ namespace Anti_Procrastination
         }
         public static void Validate()
         {
-            
+
             var listDirPath = @$"{Directory.GetCurrentDirectory()}\Lists";
             var logsDirPath = @$"{Directory.GetCurrentDirectory()}\Logs";
             if (!Directory.Exists(logsDirPath))
@@ -71,7 +69,7 @@ namespace Anti_Procrastination
 
         }
     }
-    
+
     public class Bootstrap
     {
         private IHostApplicationLifetime lifetime;
@@ -82,15 +80,15 @@ namespace Anti_Procrastination
             builder.Services.AddWindowsService(options =>
             {
                 options.ServiceName = "Anti-Procrastination";
-                
+
             });
             builder.Services.AddSingleton<JobModule>();
             builder.Services.AddHostedService(sp => sp.GetRequiredService<JobModule>());
-            
+
             builder.Services.AddHostedService<TimeBlockerModule>();
             builder.Services.AddHostedService<SleepModule>();
             builder.Services.AddHostedService<GoalModule>();
-            
+
             IHost host = builder.Build();
             lifetime = host.Services.GetRequiredService<IHostApplicationLifetime>();
             host.Run();
@@ -99,8 +97,8 @@ namespace Anti_Procrastination
         public void StartMenu()
         {
             var timerMenu = new TimerMenu();
-            var timeBlockerMenu = new TimeBlockerMenu(Program.BlackList);
-            var jobMenu = new JobMenu(Program.BlackList);
+            var timeBlockerMenu = new TimeBlockerMenu();
+            var jobMenu = new JobMenu();
             var sleepMenu = new SleepMenu();
             var mainMenu = new MainMenu();
             var taskMenu = new TaskMenu();

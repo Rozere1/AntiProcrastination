@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-public class CreateTaskPunct : IPunct
+﻿public class CreateTaskPunct : IPunct
 {
     private string name;
     private DateTime deadline;
@@ -8,9 +7,9 @@ public class CreateTaskPunct : IPunct
         ChangeName();
         ChangeDeadline();
         Check();
-        var taskData = new Goal(1,"AS", DateTime.Now);
+        var taskData = new Goal(1, "AS", DateTime.Now);
         SaverManager.Instance.SaveTask(taskData, $"Tasks\\{name}.json");
-        
+
     }
     private void ChangeName()
     {

@@ -11,11 +11,11 @@ public class CreateService : IPunct
     }
     private void Check(string? ans)
     {
-        if(ans.ToUpper() == "N")
+        if (ans.ToUpper() == "N")
         {
             Console.WriteLine("Вы отклонили запрос, служба не будет создана");
         }
-        else if(ans.ToUpper() == "Y")
+        else if (ans.ToUpper() == "Y")
         {
 
             try
