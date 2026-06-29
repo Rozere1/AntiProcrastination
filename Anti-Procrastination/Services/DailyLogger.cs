@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-public class DailyLogger : ILogger
+public class DailyLogger
 {
     private DailyLog log;
     private string serviceLogs;

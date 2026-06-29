@@ -55,7 +55,7 @@
             return;
         HookProcesses();
         KillBlackListProcesess();
-
+        BannedProcesses.Clear();
     }
 
 

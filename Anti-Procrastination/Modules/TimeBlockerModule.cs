@@ -9,6 +9,9 @@ public class TimeBlockerModule : BlackListModule
     {
         _logger = logger;
         var now = DateTime.Now;
+        var lastStart = SaverManager.Instance.LoadSettings().Date;
+        if (lastStart.Day < now.Day)
+            RemainingTime = UseTime;
         var date = new DateTime(now.Year, now.Month, now.Day + 1, 0, 0, 0);
         Timer = new ScheduleTimer(date);
         Timer.Start();
@@ -17,7 +20,7 @@ public class TimeBlockerModule : BlackListModule
         jobModule = module;
         Init();
         Update();
-
+        
     }
     public int UseTime;
     public int RemainingTime;
@@ -41,7 +44,7 @@ public class TimeBlockerModule : BlackListModule
         }
         HookProcesses();
         StartTimer();
-
+        BannedProcesses.Clear();
     }
 
     private void Reset(object? sender, ElapsedEventArgs e)

@@ -40,6 +40,7 @@ public abstract class BlackListModule : Module
         {
             IsBlackList = false;
         }
-        BannedProcesses.Clear();
+        
+        
     }
 }
