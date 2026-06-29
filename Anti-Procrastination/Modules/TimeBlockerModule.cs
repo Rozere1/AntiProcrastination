@@ -1,11 +1,13 @@
-﻿using System.Timers;
+﻿using Microsoft.Extensions.Logging;
+using System.Timers;
 
 public class TimeBlockerModule : BlackListModule
 {
     private ScheduleTimer Timer;
-    public TimeBlockerModule(JobModule module) : base()
+    private ILogger<TimeBlockerModule> _logger;
+    public TimeBlockerModule(JobModule module, ILogger<TimeBlockerModule> logger) : base()
     {
-
+        _logger = logger;
         var now = DateTime.Now;
         var date = new DateTime(now.Year, now.Month, now.Day + 1, 0, 0, 0);
         Timer = new ScheduleTimer(date);
@@ -45,7 +47,7 @@ public class TimeBlockerModule : BlackListModule
     private void Reset(object? sender, ElapsedEventArgs e)
     {
         RemainingTime = UseTime;
-
+        
     }
 
 
@@ -68,13 +70,15 @@ public class TimeBlockerModule : BlackListModule
     }
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        
         try
         {
+            var background = ReadCommand(stoppingToken);
             while (!stoppingToken.IsCancellationRequested)
             {
                 await Task.Delay(1000, stoppingToken);
+                _logger.LogInformation($"Time Remaining: {RemainingTime}");
                 Activate();
-                await ReadCommand(stoppingToken);
             }
         }
         catch (OperationCanceledException)

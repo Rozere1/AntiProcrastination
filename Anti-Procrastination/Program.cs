@@ -1,6 +1,7 @@
 ﻿using Anti_Procrastination.Menus;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging.Configuration;
 using System.ServiceProcess;
 namespace Anti_Procrastination
 {
@@ -88,7 +89,6 @@ namespace Anti_Procrastination
             builder.Services.AddHostedService<TimeBlockerModule>();
             builder.Services.AddHostedService<SleepModule>();
             builder.Services.AddHostedService<GoalModule>();
-
             IHost host = builder.Build();
             lifetime = host.Services.GetRequiredService<IHostApplicationLifetime>();
             host.Run();

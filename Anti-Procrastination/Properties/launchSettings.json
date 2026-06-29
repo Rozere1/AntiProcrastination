@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Anti-Procrastination": {
+      "commandName": "Project",
+      "commandLineArgs": "-sart"
+    }
+  }
+}

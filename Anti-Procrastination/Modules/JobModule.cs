@@ -1,6 +1,6 @@
-﻿public class JobModule : BlackListModule, ISwitch, IService
+﻿public class JobModule : BlackListModule, ISwitch
 {
-    public bool IsRun { get; protected set; }
+    public bool IsRun { get; set; }
     public JobModule() : base()
     {
         pipeName = "Job";
@@ -63,10 +63,10 @@
     {
         try
         {
+            var background = ReadCommand(stoppingToken);
             while (!stoppingToken.IsCancellationRequested)
             {
                 Activate();
-                await ReadCommand(stoppingToken);
                 await Task.Delay(1000, stoppingToken);
             }
         }

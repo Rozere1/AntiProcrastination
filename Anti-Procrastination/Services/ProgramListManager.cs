@@ -23,7 +23,6 @@
             }
             catch
             {
-                Console.WriteLine("Ошибка при чтении");
 
             }
             return programList;

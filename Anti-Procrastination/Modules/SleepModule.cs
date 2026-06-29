@@ -1,9 +1,10 @@
-﻿using System.Diagnostics;
+﻿using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using System.Timers;
 
-public class SleepModule : Module
+public class SleepModule : Module, ISwitch
 {
-
+    public bool IsRun { get; set; }
     public int Hours { get; private set; }
     public ScheduleTimer Timer { get; private set; }
     public SleepModule() : base()
@@ -17,8 +18,7 @@ public class SleepModule : Module
     }
     private DateTime SetDate()
     {
-
-        var now = DateTime.UtcNow;
+        var now = DateTime.Now;
         var date = new DateTime(now.Year, now.Month, now.Day, Hours, 0, 0);
         return date;
     }
@@ -54,18 +54,16 @@ public class SleepModule : Module
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        Activate();
         try
         {
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                await ReadCommand(stoppingToken);
-            }
+            var background = ReadCommand(stoppingToken);
         }
-        catch (OperationCanceledException)
+        catch(Exception ex)
         {
 
         }
+        Activate();
+
     }
     public override async Task StopAsync(CancellationToken stoppingToken)
     {
@@ -82,7 +80,15 @@ public class SleepModule : Module
             case "update":
                 Update();
                 break;
+            case "switch":
+                Switch();
+                break;
 
         }
+    }
+
+    public void Switch()
+    {
+        IsRun = !IsRun;
     }
 }

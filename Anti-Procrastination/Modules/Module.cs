@@ -4,7 +4,7 @@ using System.IO.Pipes;
 
 
 
-public abstract class Module : BackgroundService, IService
+public abstract class Module : BackgroundService
 {
     protected abstract void CheckCommand(string? command);
     protected NamedPipeServerStream server;
@@ -16,12 +16,15 @@ public abstract class Module : BackgroundService, IService
     public abstract void Activate();
     protected async Task ReadCommand(CancellationToken stoppingToken)
     {
-        await server.WaitForConnectionAsync(stoppingToken);
-        var reader = new StreamReader(server);
-        var command = await reader.ReadLineAsync();
-        if (command != null)
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            await server.WaitForConnectionAsync(stoppingToken);
+            var reader = new StreamReader(server);
+            var command = await reader.ReadLineAsync();
+            if (command != null)
             CheckCommand(command.ToLower());
-        server.Disconnect();
+            server.Disconnect();
+        }
     }
 
 }

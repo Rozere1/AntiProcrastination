@@ -25,9 +25,7 @@
     {
         try
         {
-            Activate();
-
-            await ReadCommand(stoppingToken);
+            var background = ReadCommand(stoppingToken);
         }
         catch
         {

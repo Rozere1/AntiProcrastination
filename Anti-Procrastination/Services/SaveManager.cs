@@ -14,9 +14,14 @@ public class SaverManager
         if (!File.Exists(path))
         {
             var file = File.Create(path);
+            SaveSettings(SettingType.Default, 0);
             file.Close();
         }
-        SaveSettings(SettingType.Default, 0);
+        else
+        {
+            settings = LoadSettings();
+            SaveSettings(SettingType.LastStart, DateTime.Now);
+        }
     }
     public void SaveSettings(SettingType type, object data)
     {
@@ -26,17 +31,17 @@ public class SaverManager
         switch (type)
         {
             case SettingType.TimeRemaining:
-                settings.TimeRemaining = (int)data;
-                break;
+                settings.TimeRemaining = (int)data; break;
             case SettingType.UseTime:
-                settings.UseTime = (int)data;
-                break;
+                settings.UseTime = (int)data; break;
             case SettingType.SleepHour:
-                settings.SleepHour = (int)data;
-                break;
+                settings.SleepHour = (int)data; break;
             case SettingType.IsJobRun:
-                settings.IsJobRun = (bool)data;
-                break;
+                settings.IsJobRun = (bool)data; break;
+            case SettingType.IsSleepRun:
+                settings.IsSleepRun = (bool)data; break;
+            case SettingType.LastStart:
+                settings.Date = (DateTime)data; break;
             case SettingType.Default:
                 settings = LoadSettings();
                 break;
@@ -76,5 +81,7 @@ public enum SettingType
     UseTime,
     SleepHour,
     IsJobRun,
+    IsSleepRun,
+    LastStart,
     Default
 }

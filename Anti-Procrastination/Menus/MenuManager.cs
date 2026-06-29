@@ -1,4 +1,4 @@
-﻿public class MenuManager : IService
+﻿public class MenuManager
 {
     public static MenuManager Instance;
     private Dictionary<string, Menu> menus = new Dictionary<string, Menu>();

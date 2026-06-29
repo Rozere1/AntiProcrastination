@@ -34,10 +34,12 @@ public abstract class BlackListModule : Module
                 IsBlackList = true;
             }
 
+
         }
         if (BannedProcesses.Count == 0)
         {
             IsBlackList = false;
         }
+        BannedProcesses.Clear();
     }
 }
